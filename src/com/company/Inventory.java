@@ -3,8 +3,8 @@
 // TODO: Implement JUnit testing
 
 package com.company;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 
 /**
  * Interface to manage the products and their stock
