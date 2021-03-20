@@ -2,8 +2,7 @@
 
 package com.company;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Manages the shopping cart of a StoreView user
