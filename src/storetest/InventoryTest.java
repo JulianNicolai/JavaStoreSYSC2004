@@ -7,6 +7,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO: Add JavaDoc for all test cases
+
 public class InventoryTest {
 
     @Test
