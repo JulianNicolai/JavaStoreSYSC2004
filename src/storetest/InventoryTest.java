@@ -7,10 +7,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Add JavaDoc for all test cases
-
+/**
+ * Test infrastructure for verifying integrity of class Inventory and its public functions
+ */
 public class InventoryTest {
 
+    /**
+     * Test case for getInventoryInfo()
+     * Verifies all products in the list after object construction are present
+     */
     @Test
     public void getInventoryInfoTestAdded() {
         Inventory inventory = new Inventory();
@@ -20,6 +25,14 @@ public class InventoryTest {
         assertEquals(8, data.size(), "One or more products failed to add or the list is not complete");
     }
 
+    /**
+     * Test case for getInventoryInfo()
+     * Verifies all items in the list are:
+     * - Not null
+     * - ID is not negative (indicating null product)
+     * - Price is not -0.0 (indicating null product)
+     * - Stock is not negative
+     */
     @Test
     public void getInventoryInfoTestValues() {
         Inventory inventory = new Inventory();
@@ -37,6 +50,10 @@ public class InventoryTest {
         }
     }
 
+    /**
+     * Test case for getStock()
+     * Verifies it retrieves correct stock
+     */
     @Test
     public void getStockTestFunction() {
         Inventory inventory = new Inventory();
@@ -50,6 +67,10 @@ public class InventoryTest {
         assertEquals(10, stock);
     }
 
+    /**
+     * Test case for getStock()
+     * Verifies it checks existing product
+     */
     @Test
     public void getStockTestProdNonExistException() {
         Inventory inventory = new Inventory();
@@ -59,6 +80,10 @@ public class InventoryTest {
                 "Fails to check for existing product");
     }
 
+    /**
+     * Test case for addNewProduct()
+     * Verifies the product is added successfully
+     */
     @Test
     public void addNewProductTestFunction() {
         Inventory inventory = new Inventory();
@@ -71,6 +96,10 @@ public class InventoryTest {
         assertEquals(5, inventory.getStock(prodID), "Fails to add correct stock value");
     }
 
+    /**
+     * Test case for addNewProduct()
+     * Verifies it checks for setting negative price
+     */
     @Test
     public void addNewProductTestNegPriceException() {
         Inventory inventory = new Inventory();
@@ -80,6 +109,10 @@ public class InventoryTest {
                 "Fails to check for negative price");
     }
 
+    /**
+     * Test case for addNewProduct()
+     * Verifies it checks for setting negative stock
+     */
     @Test
     public void addNewProductTestNegStockException() {
         Inventory inventory = new Inventory();
@@ -89,6 +122,10 @@ public class InventoryTest {
                 "Fails to check for negative stock");
     }
 
+    /**
+     * Test case for addNewProduct()
+     * Verifies the parameter name is not null
+     */
     @Test
     public void addNewProductTestNullNameException() {
         Inventory inventory = new Inventory();
@@ -98,6 +135,10 @@ public class InventoryTest {
                 "Fails to check for null name");
     }
 
+    /**
+     * Test case for addStock()
+     * Verifies it adds stock after legal arguments are passed
+     */
     @Test
     public void addStockTestFunction() {
         Inventory inventory = new Inventory();
@@ -118,6 +159,10 @@ public class InventoryTest {
 
     }
 
+    /**
+     * Test case for addStock()
+     * Verifies it checks for negative stock
+     */
     @Test
     public void addStockTestNegStockException() {
         Inventory inventory = new Inventory();
@@ -131,6 +176,10 @@ public class InventoryTest {
                 "Fails to check for negative stock");
     }
 
+    /**
+     * Test case for addStock()
+     * Verifies it checks for an existing product
+     */
     @Test
     public void addStockTestProductNonExistException() {
         Inventory inventory = new Inventory();
@@ -140,6 +189,10 @@ public class InventoryTest {
                 "Fails to check for existing product");
     }
 
+    /**
+     * Test case for removeStock()
+     * Verifies it removes stock after legal arguments are passed
+     */
     @Test
     public void removeStockTestFunction() {
         Inventory inventory = new Inventory();
@@ -159,6 +212,10 @@ public class InventoryTest {
         assertEquals(oldStock - 3, newStock);
     }
 
+    /**
+     * Test case for removeStock()
+     * Verifies it checks for negative stock
+     */
     @Test
     public void removeStockTestNegStockException() {
         Inventory inventory = new Inventory();
@@ -172,6 +229,10 @@ public class InventoryTest {
                 "Fails to check for negative stock");
     }
 
+    /**
+     * Test case for removeStock()
+     * Verifies it checks for an existing product
+     */
     @Test
     public void removeStockTestProductNonExistException() {
         Inventory inventory = new Inventory();
@@ -181,6 +242,10 @@ public class InventoryTest {
                 "Fails to check for existing product");
     }
 
+    /**
+     * Test case for removeStock()
+     * Verifies it checks enough stock before removing
+     */
     @Test
     public void removeStockTestDeficientStockException() {
         Inventory inventory = new Inventory();
