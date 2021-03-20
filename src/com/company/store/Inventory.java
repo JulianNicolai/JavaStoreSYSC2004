@@ -74,37 +74,13 @@ public class Inventory {
             newID = (int) (Math.random() * Integer.MAX_VALUE);
 
             // check for an existing product with same ID
-            Product existingProduct = getProductByID(newID);
+            ProductEntry existingProduct = getProductEntryByID(newID);
 
             // if the name of the product is null (not found) set existingID to false, break out of loop
-            existingID = !(existingProduct.getName() == null);
+            existingID = !(existingProduct.getProduct().getName() == null);
         }
 
         return newID;
-
-    }
-
-    /**
-     * Method used to retreive a Product object via its ID
-     * @param id ID of requested object
-     * @return Product object of ID, returns null product if doesn't exist
-     */
-    private Product getProductByID(int id) {
-
-        ProductEntry matchingProductEntry = new ProductEntry(); // starting state is no matching ProductEntry (null product)
-
-        if (productList.size() == 0) return matchingProductEntry.getProduct(); // if empty, return null Product for no match
-
-        // search for matching product entry
-        for (ProductEntry currentProductEntry : productList) {
-            if (currentProductEntry.getProduct().getID() == id) {
-                matchingProductEntry = currentProductEntry;
-                break;
-            }
-        }
-
-        // return match, if nothing is found remains null product
-        return matchingProductEntry.getProduct();
 
     }
 
