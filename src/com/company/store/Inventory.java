@@ -117,7 +117,9 @@ public class Inventory {
 
         if (price < 0.0 || stock < 0)
             throw new IllegalArgumentException("Stock and price cannot be less than 0.");
-        else {
+        if (name == null) {
+            throw new IllegalArgumentException("Product name cannot be null.");
+        } else {
             int id = generateProductID();
             Product newProduct = new Product(id, name, price);
             ProductEntry newProductEntry = new ProductEntry(newProduct, stock);
