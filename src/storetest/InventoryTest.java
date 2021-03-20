@@ -90,6 +90,15 @@ public class InventoryTest {
     }
 
     @Test
+    public void addNewProductTestNullNameException() {
+        Inventory inventory = new Inventory();
+
+        assertThrows(IllegalArgumentException.class, () ->
+                        inventory.addNewProduct(null, 14.99, 5),
+                "Fails to check for null name");
+    }
+
+    @Test
     public void addStockTestFunction() {
         Inventory inventory = new Inventory();
 
