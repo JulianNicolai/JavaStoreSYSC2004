@@ -2,7 +2,7 @@
 
 // TODO: Implement JUnit testing
 
-package com.company;
+package com.company.store;
 
 import java.util.*;
 
@@ -89,7 +89,7 @@ public class Inventory {
      * @param id ID of requested object
      * @return Product object of ID, returns null product if doesn't exist
      */
-    public Product getProductByID(int id) {
+    private Product getProductByID(int id) {
 
         ProductEntry matchingProductEntry = new ProductEntry(); // starting state is no matching ProductEntry (null product)
 
@@ -164,9 +164,9 @@ public class Inventory {
 
         if (numStock < 1) {
             throw new IllegalArgumentException("Number of units must be 1 or more.");
-        } else {
-            productEntry.setStock(productEntry.getStock() + numStock);
-        }
+        } else if (productEntry.getProduct().getName() == null) {
+            throw new IllegalArgumentException("The product requested does not exist.");
+        } else productEntry.setStock(productEntry.getStock() + numStock);
     }
 
     /**
@@ -184,8 +184,22 @@ public class Inventory {
         } else if (stock - numStock < 0){
             throw new IllegalArgumentException("Number of units specified exceeds available stock.");
         } else if (productEntry.getProduct().getName() == null) {
-            throw new IllegalArgumentException("The Product ID specified does not exist.");
+            throw new IllegalArgumentException("The product requested does not exist.");
         } else productEntry.setStock(productEntry.getStock() - numStock);
+    }
+
+    /**
+     * Method for retrieving the current stock of a Product
+     * @param id ID of desired Product
+     * @return amount of stock
+     */
+    public int getStock(int id) {
+        ProductEntry productEntry = getProductEntryByID(id);
+
+        if (productEntry.getProduct().getName() == null)
+            throw new IllegalArgumentException("The product requested does not exist.");
+
+        return productEntry.getStock();
     }
 
     /**

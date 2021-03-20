@@ -1,6 +1,6 @@
 // Julian Nicolai 101154233
 
-package com.company;
+package com.company.store;
 
 import java.util.*;
 

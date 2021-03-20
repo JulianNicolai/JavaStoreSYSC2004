@@ -2,7 +2,7 @@
 
 // TODO: Implement JUnit testing
 
-package com.company;
+package com.company.store;
 
 import java.util.*;
 

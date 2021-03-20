@@ -1,6 +1,6 @@
 // Julian Nicolai 101154233
 
-package com.company;
+package com.company.store;
 
 /**
  * Object to store product information such as its ID, name, and price
