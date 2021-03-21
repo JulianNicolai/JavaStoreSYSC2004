@@ -2,6 +2,8 @@
 
 package com.company.store;
 
+import java.util.UUID;
+
 /**
  * Object to store product information such as its ID, name, and price
  * @author Julian Nicolai 101154233
@@ -11,7 +13,7 @@ public class Product {
     /**
      * Integer ID of the product
      */
-    private final int ID;
+    private final UUID ID;
 
     /**
      * String name of the product
@@ -26,7 +28,7 @@ public class Product {
     /**
      * Null (empty) Product constructor
      */
-    public Product() { this(-1, null, -0.0); }
+    public Product() { this(null, null, -0.0); }
 
     /**
      * Product constructor that requires all attributes as parameters
@@ -34,7 +36,7 @@ public class Product {
      * @param name Name of the product
      * @param price Price of the product
      */
-    public Product(int id, String name, double price) {
+    public Product(UUID id, String name, double price) {
         this.ID = id;
         this.name = name;
         this.price = price;
@@ -50,7 +52,7 @@ public class Product {
      * Get method to retrieve the ID of a product
      * @return Integer ID of the product
      */
-    public int getID() { return this.ID; }
+    public UUID getID() { return this.ID; }
 
     /**
      * Get method to retrieve the price of a product

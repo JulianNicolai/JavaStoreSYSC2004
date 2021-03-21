@@ -5,9 +5,12 @@ package storetest;
 import com.company.store.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * Test infrastructure for verifying integrity of class StoreManager and its public functions
+ */
 public class StoreManagerTest {
 
     /**
@@ -77,7 +80,7 @@ public class StoreManagerTest {
     public void getUserByIDTestFunction() {
         StoreManager store = new StoreManager();
         StoreView user = new StoreView(store);
-        int cartID = user.getCartID();
+        UUID cartID = user.getCartID();
 
         assertEquals(user, store.getUserByID(cartID), "Cannot retrieve user/correct user.");
 
@@ -91,7 +94,7 @@ public class StoreManagerTest {
         StoreManager store = new StoreManager();
         StoreView user = new StoreView(store);
 
-        assertNull(store.getUserByID(-1), "Returns incorrect user");
+        assertNull(store.getUserByID(UUID.randomUUID()), "Returns incorrect user");
 
     }
 
@@ -145,7 +148,7 @@ public class StoreManagerTest {
         StoreManager store = new StoreManager();
 
         assertThrows(IllegalArgumentException.class, () ->
-                        store.addStock(-15, 5),
+                        store.addStock(UUID.randomUUID(), 5),
                 "Fails to check for existing product");
     }
 
@@ -198,7 +201,7 @@ public class StoreManagerTest {
         StoreManager store = new StoreManager();
 
         assertThrows(IllegalArgumentException.class, () ->
-                        store.removeStock(-15, 5),
+                        store.removeStock(UUID.randomUUID(), 5),
                 "Fails to check for existing product");
     }
 

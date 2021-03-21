@@ -4,9 +4,9 @@ package storetest;
 
 import com.company.store.*;
 import org.junit.jupiter.api.*;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Test infrastructure for verifying integrity of class Inventory and its public functions
@@ -45,7 +45,7 @@ public class InventoryTest {
             Product prod = (Product) item.get(1);
 
             assertNotNull(prod.getName(), "Null product");
-            assertNotEquals(-1, prod.getID(), "Null product ID assigned");
+            assertNotNull(prod.getID(), "Null product ID assigned");
             assertNotEquals(-0.0, prod.getPrice(), "Null product price assigned");
             assertTrue(stock >= 0, "Incorrect stock values");
         }
@@ -77,7 +77,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class,
-                () -> inventory.getStock(-15),
+                () -> inventory.getStock(UUID.randomUUID()),
                 "Fails to check for existing product");
     }
 
@@ -89,7 +89,7 @@ public class InventoryTest {
     public void addNewProductTestFunction() {
         Inventory inventory = new Inventory();
 
-        int prodID = inventory.addNewProduct("name", 14.99, 5);
+        UUID prodID = inventory.addNewProduct("name", 14.99, 5);
 
         List<List<Object>> data = inventory.getInventoryInfo();
 
@@ -186,7 +186,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class, () ->
-                inventory.addStock(-15, 5),
+                inventory.addStock(UUID.randomUUID(), 5),
                 "Fails to check for existing product");
     }
 
@@ -239,7 +239,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class, () ->
-                inventory.removeStock(-15, 5),
+                inventory.removeStock(UUID.randomUUID(), 5),
                 "Fails to check for existing product");
     }
 

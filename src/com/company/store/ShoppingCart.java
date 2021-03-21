@@ -48,7 +48,7 @@ public class ShoppingCart {
      * @param id ID of requested object
      * @return CartEntry object of ID, returns null product if doesn't exist
      */
-    private CartEntry getCartEntryByID(int id) {
+    private CartEntry getCartEntryByID(UUID id) {
 
         CartEntry matchingCartEntry = new CartEntry(); // starting state is no matching CartEntry (null product)
 
@@ -56,7 +56,7 @@ public class ShoppingCart {
 
         // search for matching product entry
         for (CartEntry currentCartEntry : cartList) {
-            if (currentCartEntry.getProduct().getID() == id) {
+            if (currentCartEntry.getProduct().getID().equals(id)) {
                 matchingCartEntry = currentCartEntry;
                 break;
             }

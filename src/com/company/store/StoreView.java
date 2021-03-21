@@ -18,7 +18,7 @@ public class StoreView {
     /**
      * ID of the shopping cart and user
      */
-    private final int cartID;
+    private final UUID cartID;
 
     /**
      * Aggregation of user preferences for all users such as UI display size.
@@ -36,7 +36,8 @@ public class StoreView {
      */
     public StoreView(StoreManager store) {
         this.store = store;
-        this.cartID = store.generateCartID(this);
+        this.cartID = UUID.randomUUID();
+        store.addUser(this);
         this.cart = new ShoppingCart();
         // the following are the various available universal user preferences for UI customization
         userPreferences.put("lineLength", 60); // changes character size of UI
@@ -50,7 +51,7 @@ public class StoreView {
      * Method to retrieve the cart ID of a user
      * @return Integer cartID of user
      */
-    public int getCartID() { return cartID; }
+    public UUID getCartID() { return cartID; }
 
     public ShoppingCart getCart() { return cart; }
 
