@@ -59,35 +59,11 @@ public class Inventory {
     }
 
     /**
-     * Method to generate a random product ID
-     * @return Integer ID between 0 and 2147483647
-     */
-    private int generateProductID() {
-
-        int newID = 0;
-        boolean existingID = true;
-
-        while (existingID) {
-            // generate a random integer between 0 and 2147483647
-            newID = (int) (Math.random() * Integer.MAX_VALUE);
-
-            // check for an existing product with same ID
-            ProductEntry existingProduct = getProductEntryByID(newID);
-
-            // if the name of the product is null (not found) set existingID to false, break out of loop
-            existingID = !(existingProduct.getProduct().getName() == null);
-        }
-
-        return newID;
-
-    }
-
-    /**
      * Method used to retrieve a ProductEntry object via the Product's ID
      * @param id ID of requested object
      * @return ProductEntry object of ID, returns null product if doesn't exist
      */
-    private ProductEntry getProductEntryByID(int id) {
+    private ProductEntry getProductEntryByID(UUID id) {
 
         ProductEntry matchingProductEntry = new ProductEntry(); // starting state is no matching ProductEntry (null product)
 
@@ -95,7 +71,7 @@ public class Inventory {
 
         // search for matching product entry
         for (ProductEntry currentProductEntry : productList) {
-            if (currentProductEntry.getProduct().getID() == id) {
+            if (currentProductEntry.getProduct().getID().equals(id)) {
                 matchingProductEntry = currentProductEntry;
                 break;
             }
@@ -113,14 +89,14 @@ public class Inventory {
      * @param stock Amount of stock available for product
      * @return generated ID of added product
      */
-    public int addNewProduct(String name, double price, int stock) {
+    public UUID addNewProduct(String name, double price, int stock) {
 
         if (price < 0.0 || stock < 0)
             throw new IllegalArgumentException("Stock and price cannot be less than 0.");
         if (name == null) {
             throw new IllegalArgumentException("Product name cannot be null.");
         } else {
-            int id = generateProductID();
+            UUID id = UUID.randomUUID();
             Product newProduct = new Product(id, name, price);
             ProductEntry newProductEntry = new ProductEntry(newProduct, stock);
             this.productList.add(newProductEntry);
@@ -134,7 +110,7 @@ public class Inventory {
      * @param id ID of requested object
      * @param numStock amount of stock to add
      */
-    public void addStock(int id, int numStock) {
+    public void addStock(UUID id, int numStock) {
 
         ProductEntry productEntry = getProductEntryByID(id);
 
@@ -150,7 +126,7 @@ public class Inventory {
      * @param id ID of requested object
      * @param numStock amount of stock to remove
      */
-    public void removeStock(int id, int numStock) {
+    public void removeStock(UUID id, int numStock) {
 
         ProductEntry productEntry = getProductEntryByID(id);
         int stock = productEntry.getStock();
@@ -169,7 +145,7 @@ public class Inventory {
      * @param id ID of desired Product
      * @return amount of stock
      */
-    public int getStock(int id) {
+    public int getStock(UUID id) {
         ProductEntry productEntry = getProductEntryByID(id);
 
         if (productEntry.getProduct().getName() == null)
