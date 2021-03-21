@@ -52,6 +52,8 @@ public class StoreView {
      */
     public int getCartID() { return cartID; }
 
+    public ShoppingCart getCart() { return cart; }
+
     /**
      * Main entry point to initialize and run program
      * @param args command line arguments used to start program; unused
