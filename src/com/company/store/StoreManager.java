@@ -59,28 +59,28 @@ public class StoreManager {
      * @param id ID of the product requested
      * @param numUnits number of units to be removed
      */
-    public void removeStock(int id, int numUnits) { inventory.removeStock(id, numUnits); }
+    public void removeStock(UUID id, int numUnits) { inventory.removeStock(id, numUnits); }
 
     /**
      * Proxy method to add stock to the inventory
      * @param id ID of the product requested
      * @param numUnits number of units to be added
      */
-    public void addStock(int id, int numUnits) { inventory.addStock(id, numUnits); }
+    public void addStock(UUID id, int numUnits) { inventory.addStock(id, numUnits); }
 
     /**
      * Method to retrieve StoreView user
      * @param id cartID of requested user
      * @return StoreView user object if found, null if ID doesn't exist
      */
-    public StoreView getUserByID(int id) {
+    public StoreView getUserByID(UUID id) {
 
         if (users.size() == 0) return null;
 
         StoreView matchingStoreView = null;
 
         for (StoreView user : users) {
-            if (user.getCartID() == id) {
+            if (user.getCartID().equals(id)) {
                 matchingStoreView = user;
                 break;
             }
@@ -90,34 +90,20 @@ public class StoreManager {
     }
 
     /**
-     * Method to generate a unique cart ID for StoreView user
-     * @param newUser user to create a new ID for
-     * @return the random integer ID between 0 and 2147483647
-     */
-    public int generateCartID(StoreView newUser) {
-
-        int newID = 0;
-        boolean existingID = true;
-
-        while (existingID) {
-
-            newID = (int) (Math.random() * Integer.MAX_VALUE);
-
-            StoreView user = getUserByID(newID);
-
-            if (user == null) existingID = false;
-
-        }
-
-        users.add(newUser);
-
-        return newID;
-    }
-
-    /**
      * Proxy method to retrieve information about the products contained in Inventory
      * @return 2D list of objects containing the product and its stock
      */
     public List<List<Object>> getInventoryInfo() { return inventory.getInventoryInfo(); }
 
+    public void addUser(StoreView storeView) {
+
+        boolean foundFlag = false;
+        for (StoreView user : users) {
+            if (user.getCartID().equals(storeView.getCartID())) {
+                foundFlag = true;
+                break;
+            }
+        }
+        if (!foundFlag) users.add(storeView);
+    }
 }
