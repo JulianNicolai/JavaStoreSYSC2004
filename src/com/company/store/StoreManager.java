@@ -1,7 +1,5 @@
 // Julian Nicolai 101154233
 
-// TODO: Implement JUnit testing
-
 package com.company.store;
 
 import java.util.*;
