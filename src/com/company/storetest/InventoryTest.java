@@ -1,6 +1,6 @@
 // Julian Nicolai 101154233
 
-package storetest;
+package com.company.storetest;
 
 import com.company.store.*;
 import org.junit.jupiter.api.*;
