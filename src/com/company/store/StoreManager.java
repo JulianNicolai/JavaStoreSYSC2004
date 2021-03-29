@@ -28,6 +28,8 @@ public class StoreManager {
         this.users = new ArrayList<>();
     }
 
+    public List<StoreView> getUsers() { return this.users; }
+
     /**
      * Method to calculate transaction total and clear the users cart
      * @param user the StoreView user to process the transaction for
