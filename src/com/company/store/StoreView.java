@@ -290,6 +290,9 @@ public class StoreView {
 
     public void displayGUI() {
 
+        List<List<Object>> inventoryArray = store.getInventoryInfo();
+        List<List<Object>> cartArray = cart.getCartInfo();
+
         frame.getContentPane().removeAll();
         frame.repaint();
 
@@ -354,17 +357,17 @@ public class StoreView {
         cartButton.addActionListener(e -> {
             AbstractButton button = (AbstractButton) e.getSource();
             cartPanel.setVisible(button.getModel().isSelected());
-            cartProductPanel.add(createCartProductPanel());
         });
 
-        for (int i = 0; i < 8; i++) {
-            cartProductPanel.add(createCartProductPanel());
+        for (List<Object> item : cartArray) {
+            int units = (int) item.get(0);
+            Product product = (Product) item.get(1);
+            productsPanel.add(createCartProductPanel(product, units));
         }
 
-        Product product = new Product(UUID.randomUUID(), "kids meal", 29.99, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
-        int stock = 19;
-
-        for (int i = 0; i < 8; i++) {
+        for (List<Object> item : inventoryArray) {
+            int stock = (int) item.get(0);
+            Product product = (Product) item.get(1);
             productsPanel.add(createProductPanel(product, stock));
         }
 
@@ -554,7 +557,7 @@ public class StoreView {
         return productPanel;
     }
 
-    private JPanel createCartProductPanel() {
+    private JPanel createCartProductPanel(Product product, int units) {
         JPanel productPanel = new JPanel(new GridBagLayout());
         productPanel.setPreferredSize(new Dimension(0, 75));
         productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
