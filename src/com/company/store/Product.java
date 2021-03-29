@@ -25,10 +25,14 @@ public class Product {
      */
     private final double price;
 
+    private final String image;
+
+    private final String description;
+
     /**
      * Null (empty) Product constructor
      */
-    public Product() { this(null, null, -0.0); }
+    public Product() { this(null, null, -0.0, null, null); }
 
     /**
      * Product constructor that requires all attributes as parameters
@@ -36,10 +40,12 @@ public class Product {
      * @param name Name of the product
      * @param price Price of the product
      */
-    public Product(UUID id, String name, double price) {
+    public Product(UUID id, String name, double price, String image, String description) {
         this.ID = id;
         this.name = name;
         this.price = price;
+        this.image = image;
+        this.description = description;
     }
 
     /**
@@ -59,4 +65,16 @@ public class Product {
      * @return Double price of the product
      */
     public double getPrice() { return this.price; }
+
+    /**
+     * Get method to retrieve location of product image
+     * @return String image file location
+     */
+    public String getImage() { return this.image; }
+
+    /**
+     * Get method to retrieve description of product
+     * @return String description of product
+     */
+    public String getDescription() { return this.description; }
 }
