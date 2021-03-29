@@ -28,11 +28,6 @@ public class StoreView {
     private final UUID cartID;
 
     /**
-     * Aggregation of user preferences for all users such as UI display size.
-     */
-    private static final HashMap<String, Object> userPreferences = new HashMap<>();
-
-    /**
      * ShoppingCart object contained user selections
      */
     private final ShoppingCart cart;
@@ -55,16 +50,15 @@ public class StoreView {
 
         this.username = username;
         this.password = new char[password.length()];
-        for (int i = 0; i < password.length(); i++) {
-            this.password[i] = password.charAt(i);
-        }
+        for (int i = 0; i < password.length(); i++) this.password[i] = password.charAt(i);
 
-        // the following are the various available universal user preferences for UI customization
-        userPreferences.put("lineLength", 60); // changes character size of UI
-        userPreferences.put("company", "LARGE RETAIL CORPORATION"); // company title
-        userPreferences.put("endChar", '|'); // title flanking character
-        userPreferences.put("dashChar", '-'); // title dash fill character
-        userPreferences.put("separateChar", '='); // line separation character
+    }
+
+    private static class UserSettings {
+        public final static String COMPANY = "LARGE RETAIL CORPORATION";
+        public final static Font FONT_16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
+        public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
+        public final static Color BACK_COLOR = new Color(71, 71, 71);
     }
 
     /**
@@ -102,7 +96,7 @@ public class StoreView {
         ImageIcon img = new ImageIcon("icon.png");
         frame.setIconImage(img.getImage());
 
-        frame.setTitle((String) userPreferences.get("company"));
+        frame.setTitle(UserSettings.COMPANY);
         frame.setMinimumSize(new Dimension(960, 540));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -121,39 +115,34 @@ public class StoreView {
 
     private static void displayLogin(List<StoreView> users) {
 
-        Font font16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
-        Font font30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
-
-        Color backColor = new Color(71, 71, 71);
-
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        loginPanel.setBackground(backColor);
+        loginPanel.setBackground(UserSettings.BACK_COLOR);
 
         JPanel borderPanel = new JPanel(new GridBagLayout());
-        borderPanel.setBackground(backColor);
+        borderPanel.setBackground(UserSettings.BACK_COLOR);
 
         JPanel hintPanel = new JPanel();
         JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and RandomUser all with password: pass");
         hintLabel.setForeground(Color.lightGray);
         hintPanel.add(hintLabel);
-        hintPanel.setBackground(backColor);
+        hintPanel.setBackground(UserSettings.BACK_COLOR);
 
         JButton loginButton = new JButton("Login");
-        loginButton.setFont(font30);
+        loginButton.setFont(UserSettings.FONT_30);
 
-        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + userPreferences.get("company") + "!</center></html>", SwingConstants.CENTER);
+        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + UserSettings.COMPANY + "!</center></html>", SwingConstants.CENTER);
         welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setFont(font30);
+        welcomeLabel.setFont(UserSettings.FONT_30);
 
         JLabel loginLabel = new JLabel("LOGIN:");
         loginLabel.setForeground(Color.WHITE);
-        loginLabel.setFont(font30);
+        loginLabel.setFont(UserSettings.FONT_30);
 
         JTextField username = new JTextField(80);
         username.setText("Username");
         username.setForeground(Color.GRAY);
-        username.setFont(font16);
+        username.setFont(UserSettings.FONT_16);
         username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -178,7 +167,7 @@ public class StoreView {
         JPasswordField password = new JPasswordField(80);
         password.setText("--------");
         password.setForeground(Color.GRAY);
-        password.setFont(font16);
+        password.setFont(UserSettings.FONT_16);
         password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -294,6 +283,7 @@ public class StoreView {
 
     }
 
+    /*
     public boolean displayGUI(boolean bool) {
         List<List<Object>> inventoryArray = store.getInventoryInfo();
         List<List<Object>> cartItemArray = cart.getCartInfo();
@@ -471,7 +461,7 @@ public class StoreView {
             }
         }
         return true;
-    }
+    }*/
 
     public static void dialog(String type, String message) {
         switch (type) {
