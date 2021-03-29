@@ -3,13 +3,9 @@
 package com.company.store;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
+import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -59,6 +55,8 @@ public class StoreView {
 
     private static class UserSettings {
         public final static String COMPANY = "LARGE RETAIL CORPORATION";
+        public final static Font FONT_8 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 8);
+        public final static Font FONT_12 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 12);
         public final static Font FONT_16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
         public final static Font FONT_22 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 22);
         public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
@@ -309,7 +307,7 @@ public class StoreView {
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         buttonPanel.setBackground(UserSettings.BACK_COLOR);
 
-        JToggleButton cartButton = new JToggleButton("My Cart");
+        JToggleButton cartButton = new JToggleButton("<html><center>View<br>My Cart</center><html>");
 
         JButton logoutButton = new JButton("<html><center>Logout of<br>" + username + "</center></html>");
 
@@ -362,8 +360,17 @@ public class StoreView {
         for (List<Object> item : cartArray) {
             int units = (int) item.get(0);
             Product product = (Product) item.get(1);
-            productsPanel.add(createCartProductPanel(product, units));
+            cartProductPanel.add(createCartProductPanel(product, units));
         }
+
+        Product prod = new Product(UUID.randomUUID(), "55 Gallon Industrial Drum of Mountain Dew (included straw)", 15.99, "images/product_images/milk.jpg", "Milk is an emulsion or colloid of butterfat globules within a water-based fluid that contains dissolved carbohydrates and protein aggregates with minerals.");
+        int units = 10;
+
+        cartProductPanel.add(createCartProductPanel(prod, units));
+        cartProductPanel.add(createCartProductPanel(prod, units));
+        cartProductPanel.add(createCartProductPanel(prod, units));
+        cartProductPanel.add(createCartProductPanel(prod, units));
+        cartProductPanel.add(createCartProductPanel(prod, units));
 
         for (List<Object> item : inventoryArray) {
             int stock = (int) item.get(0);
@@ -436,19 +443,6 @@ public class StoreView {
         itemCartPanel.setBackground(Color.WHITE);
         itemInfoPanel.setBackground(Color.WHITE);
 
-        JButton addItem = new JButton("+");
-        addItem.setFont(UserSettings.FONT_30);
-        addItem.setPreferredSize(new Dimension(55, 32));
-
-        JButton removeItem = new JButton("\u2012");
-        removeItem.setFont(UserSettings.FONT_30);
-        removeItem.setPreferredSize(new Dimension(55, 32));
-
-        JTextField itemCount = new JTextField("0");
-        itemCount.setFont(UserSettings.FONT_22);
-        itemCount.setPreferredSize(new Dimension(60, 32));
-        itemCount.setHorizontalAlignment(JTextField.CENTER);
-
         JButton addToCart = new JButton("Add to Cart");
         addToCart.setFont(UserSettings.FONT_16);
         addToCart.setPreferredSize(new Dimension(130, 32));
@@ -465,80 +459,21 @@ public class StoreView {
         setLabelWidth(priceLabel);
         priceLabel.setBorder(BorderFactory.createTitledBorder("Price"));
 
-        itemCount.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
+        SpinnerModel unitModel = new SpinnerNumberModel(0, 0, stock, 1);
 
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (itemCount.getText().equals("")) {
-                    itemCount.setText("0");
-                }
-            }
-        });
-
-        addItem.addActionListener(e -> {
-            try {
-
-                int count = Integer.parseInt(itemCount.getText());
-                if (count < 0) {
-                    count = 1;
-                } else if (count >= stock) {
-                    count = stock;
-                } else {
-                    count++;
-                }
-                itemCount.setText(Integer.toString(count));
-
-            } catch (NumberFormatException err) {
-                itemCount.setText("0");
-            }
-        });
-
-        removeItem.addActionListener(e -> {
-            try {
-
-                int count = Integer.parseInt(itemCount.getText());
-                if (count > stock) {
-                    count = stock;
-                } else if (count > 0) {
-                    count--;
-                } else {
-                    count = 0;
-                }
-                itemCount.setText(Integer.toString(count));
-
-            } catch (NumberFormatException err) {
-                itemCount.setText("0");
-            }
-        });
+        JSpinner unitSpinner = new JSpinner(unitModel);
+        unitSpinner.setFont(UserSettings.FONT_22);
+        unitSpinner.setPreferredSize(new Dimension(80, 32));
 
         addToCart.addActionListener(e -> {
-            try {
-                int count = Integer.parseInt(itemCount.getText());
-                if (count > 0 && count <= stock) {
-                    dialog("info", "Add " + count + " of product to cart.");
-                    count = 0;
-                } else if (count > stock) {
-                    String stockMessage = "There is not enough stock to add " + count + " items to your cart. Would you like to instead add " + stock + "?";
-                    if (JOptionPane.showConfirmDialog(frame, stockMessage) == JOptionPane.OK_OPTION) {
-                        count = stock;
-                    }
-                } else {
-                    count = 0;
-                }
-                // addToCart()
-                itemCount.setText(Integer.toString(count));
-            } catch (NumberFormatException err) {
-                itemCount.setText("0");
+            int units = (int) unitSpinner.getValue();
+            if (units > 0) {
+                dialog("info", "Added " + units + " of product to cart.");
+                unitSpinner.setValue(0);
             }
         });
 
-        itemCartPanel.add(addItem);
-        itemCartPanel.add(itemCount);
-        itemCartPanel.add(removeItem);
+        itemCartPanel.add(unitSpinner);
         itemCartPanel.add(addToCart);
 
         itemInfoPanel.add(priceLabel);
@@ -558,194 +493,77 @@ public class StoreView {
     }
 
     private JPanel createCartProductPanel(Product product, int units) {
-        JPanel productPanel = new JPanel(new GridBagLayout());
-        productPanel.setPreferredSize(new Dimension(0, 75));
-        productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
-        productPanel.setBackground(new Color((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)));
+
+        JPanel productPanel = new JPanel(new BorderLayout());
+        productPanel.setPreferredSize(new Dimension(0, 100));
+        productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        productPanel.setBackground(Color.WHITE);
+        productPanel.setBorder(new CompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        ImageIcon img = new ImageIcon(product.getImage());
+        ImageIcon productImageIcon = new ImageIcon(img.getImage().getScaledInstance(90, 90, Image.SCALE_DEFAULT));
+
+        JLabel productImage = new JLabel(productImageIcon);
+
+        JLabel productTitle = new JLabel("<html><body width='100%'>" + product.getName() + "</body></html>");
+        productTitle.setFont(UserSettings.FONT_16);
+        productTitle.setPreferredSize(new Dimension(180, 62));
+
+        JPanel productDetailsPanel = new JPanel(new BorderLayout());
+        productDetailsPanel.setBackground(Color.WHITE);
+
+        JButton removeFromCart = new JButton("Remove Item");
+        removeFromCart.setFont(UserSettings.FONT_12);
+        removeFromCart.setPreferredSize(new Dimension(90, 20));
+        removeFromCart.setMargin(new Insets(1, 1, 1, 1));
+
+        int stock = 15; // FIXME: get real stock
+        SpinnerModel unitModel = new SpinnerNumberModel(units, 0, stock, 1);
+
+        JSpinner unitSpinner = new JSpinner(unitModel);
+        unitSpinner.setFont(UserSettings.FONT_12);
+        unitSpinner.setPreferredSize(new Dimension(60, 20));
+
+        unitSpinner.addChangeListener(e -> {
+            if ((int) unitSpinner.getValue() == 0) {
+                // FIXME: remove from cart
+                String updateMessage = "Are you sure you want to remove this product from cart.";
+                if (JOptionPane.showConfirmDialog(frame, updateMessage) == JOptionPane.OK_OPTION) {
+                    // FIXME: remove from cart
+                    dialog("info", "PLACEHOLDER: Removed from cart.");
+                } else {
+                    unitSpinner.setValue(1);
+                }
+
+            } else {
+                // FIXME: add to cart, remove from stock
+//                    dialog("info", "PLACEHOLDER: Added to cart.");
+            }
+        });
+
+        removeFromCart.addActionListener(e -> {
+            // FIXME: remove from cart
+            dialog("info", "PLACEHOLDER: Removed from cart.");
+        });
+
+        JPanel selectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        selectPanel.setBackground(Color.WHITE);
+
+        selectPanel.add(unitSpinner);
+        selectPanel.add(removeFromCart);
+
+        productDetailsPanel.add(productTitle, BorderLayout.PAGE_START);
+        productDetailsPanel.add(selectPanel, BorderLayout.LINE_START);
+
+        productPanel.add(productDetailsPanel, BorderLayout.LINE_END);
+        productPanel.add(productImage, BorderLayout.LINE_START);
+
         return productPanel;
 
-        // TODO: add cart panel
+        // TODO: finish cart panel
     }
-
-    /*
-    public boolean displayGUI(boolean bool) {
-        List<List<Object>> inventoryArray = store.getInventoryInfo();
-        List<List<Object>> cartItemArray = cart.getCartInfo();
-
-        Scanner input = new Scanner(System.in);
-
-        boolean quitFlag = false;
-
-        String helpString = "Available commands: browse, additem, removeitem, cart, checkout, logout, quit, help";
-        String noteString = "To cancel within a command (such as selecting Options or Units) use 'cancel' to stop the operation";
-
-//        message("info", String.format("Welcome to the %s, where the customer is always right! We have money to " +
-//                "make and small businesses to crush so you better get started.", userPreferences.get("company")), true);
-//        message("info", helpString, true);
-//        message("info", noteString, true);
-
-        while (!quitFlag) {
-            System.out.print("\nInput Command: ");
-            switch (input.next()) {
-                case "browse" -> { // command to view the current inventory and stock
-
-                    // generates the title and formatted UI using user specifications
-//                    generateHeader("BROWSE");
-//                    System.out.printf(" " + generateFormat(1) + "\n", "Stock", "Product Name", "Price");
-                    System.out.print(" ");
-                    for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
-                        System.out.print(userPreferences.get("separateChar"));
-                    System.out.print("\n");
-
-                    for (List<Object> item : inventoryArray);
-//                        System.out.println(" " + productString(item, 1));
-
-                }
-                case "additem" -> { // command for adding items to the cart
-
-                    // generates the title and formatted UI using user specifications
-//                    generateHeader("ADD");
-//                    System.out.printf(" Option | " + generateFormat(10) + "\n", "Stock", "Product Name", "Price");
-                    System.out.print(" ");
-                    for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
-                        System.out.print(userPreferences.get("separateChar"));
-                    System.out.print("\n");
-
-                    int i = 1;
-                    for (List<Object> item : inventoryArray)
-//                        System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
-
-                    // acquire inputs, if arguments invalid handle exceptions
-                    try {
-
-                        System.out.print("\nOption: ");
-                        int choice = input.nextInt();
-                        Product selectedProduct = (Product) inventoryArray.get(choice - 1).get(1);
-
-                        System.out.print("Units: ");
-                        int numUnits = input.nextInt();
-                        cart.addToCart(store, selectedProduct, numUnits);
-
-//                        message("info", String.format("Added %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
-
-                    } catch (IllegalArgumentException err) {
-//                        message("error", err.getMessage());
-                    } catch (InputMismatchException err) {
-                        if (!input.next().equals("cancel")) {}
-//                            message("error", "Invalid input; must be an integer.");
-                    } catch (IndexOutOfBoundsException err) {
-//                        message("error", "Invalid option; must be between 1 and " + inventoryArray.size());
-                    } catch (Exception err) {
-//                        message("error", err.toString());
-                    }
-
-                    // refresh inventory and cart list after modification
-                    inventoryArray = store.getInventoryInfo();
-                    cartItemArray = cart.getCartInfo();
-
-                }
-                case "removeitem" -> { // command for removing items from the cart
-
-                    // generates the title
-//                    generateHeader("REMOVE");
-
-                    // check if cart contains any entries
-                    if (cartItemArray.size() != 0) {
-
-                        // generates formatted UI using user specifications
-//                        System.out.printf(" Option | " + generateFormat(10) + "\n", "Units", "Product Name", "Price");
-                        System.out.print(" ");
-                        for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
-                            System.out.print(userPreferences.get("separateChar"));
-                        System.out.print("\n");
-
-                        int i = 1;
-                        for (List<Object> item : cartItemArray)
-//                            System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
-
-                        // acquire inputs, if arguments invalid handle exceptions
-                        try {
-
-                            System.out.print("\nOption: ");
-                            int choice = input.nextInt();
-                            Product selectedProduct = (Product) cartItemArray.get(choice - 1).get(1);
-
-                            System.out.print("Units: ");
-                            int numUnits = input.nextInt();
-                            cart.removeFromCart(store, selectedProduct, numUnits);
-
-//                            message("info", String.format("Removed %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
-
-                        } catch (IllegalArgumentException err) {
-//                            message("error", err.getMessage());
-                        } catch (InputMismatchException err) {
-                            if (!input.next().equals("cancel")) {}
-//                                message("error", "Invalid input; must be an integer.");
-                        } catch (IndexOutOfBoundsException err) {
-//                            message("error", "Invalid option; must be between 1 and " + cartItemArray.size());
-                        } catch (Exception err) {
-//                            message("error", err.toString());
-                        }
-
-                        // refresh inventory and cart list after modification
-                        inventoryArray = store.getInventoryInfo();
-                        cartItemArray = cart.getCartInfo();
-
-                    }
-//                    else message("info", "There is nothing in your cart to remove.");
-
-                }
-                case "cart" -> { // command to view the current cart state
-
-                    // generates the title
-//                    generateHeader("CART");
-
-                    // check if cart contains any entries
-                    if (cartItemArray.size() != 0) {
-
-                        // generates formatted UI using user specifications
-//                        System.out.printf(" " + generateFormat(1) + "\n", "Units", "Product Name", "Price");
-                        System.out.print(" ");
-                        for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
-                            System.out.print(userPreferences.get("separateChar"));
-                        System.out.print("\n");
-
-                        for (List<Object> cartItem : cartItemArray);
-//                            System.out.println(" " + productString(cartItem, 1));
-
-                    }
-//                    else
-//                        message("info", "Cart is empty.");
-
-                }
-                case "checkout" -> { // command that completes a transactions with the current cart state
-
-                    // using current cart execute transaction
-                    double total = store.transaction(this);
-
-                    System.out.printf("\nCheckout total: $%.2f%n", total);
-//                    message("info", "Transaction complete.");
-
-                    // refresh inventory and cart list after modification
-                    inventoryArray = store.getInventoryInfo();
-                    cartItemArray = cart.getCartInfo();
-
-                }
-                case "logout" -> quitFlag = true; // closes UI, keeps user alive
-                case "quit" -> { return false; } // closes UI and kills client
-                case "help" -> {
-//                    message("info", helpString); // help string contains list of all valid commands
-//                    message("info", noteString);
-                }
-                default -> {
-                    // if the command is not found in the list of inputs notify user
-//                    message("error", "No such command exists.");
-//                    message("info", "Use 'help' command for a list of valid options.");
-                }
-            }
-        }
-        return true;
-    }*/
 
     public static void dialog(String type, String message) {
         switch (type) {
