@@ -10,6 +10,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 
@@ -62,8 +63,8 @@ public class StoreView {
         public final static Font FONT_22 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 22);
         public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
         public final static Color BACK_COLOR = new Color(71, 71, 71);
-        public final static int HEIGHT = 540;
-        public final static int WIDTH = 960;
+        public final static int HEIGHT = 648;
+        public final static int WIDTH = 1152;
     }
 
     /**
@@ -360,8 +361,8 @@ public class StoreView {
             cartProductPanel.add(createCartProductPanel());
         }
 
-        Product product = new Product(UUID.randomUUID(), "kids meal", 2.99, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
-        int stock = 15;
+        Product product = new Product(UUID.randomUUID(), "kids meal", 29.99, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
+        int stock = 19;
 
         for (int i = 0; i < 8; i++) {
             productsPanel.add(createProductPanel(product, stock));
@@ -387,6 +388,13 @@ public class StoreView {
 
     }
 
+    private void setLabelWidth(JLabel label) {
+        // strangely, the calculated preferred width is does not scale linearly
+        // a square root and weight is used to compensate for this drift
+        int preferredStockWidth = (int) (Math.pow(label.getPreferredSize().width, 0.89) * 2);
+        label.setPreferredSize(new Dimension(Math.max(preferredStockWidth, 65), 38));
+    }
+
     private JPanel createProductPanel(Product product, int stock) {
 
         JPanel productPanel = new JPanel(new BorderLayout());
@@ -403,7 +411,7 @@ public class StoreView {
         JLabel productImage = new JLabel(productImageIcon);
 
         JPanel productDetailsPanel = new JPanel(new BorderLayout());
-        productDetailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        productDetailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         productDetailsPanel.setBackground(Color.WHITE);
 
         JLabel productTitle = new JLabel(product.getName());
@@ -417,11 +425,13 @@ public class StoreView {
         descriptionPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         descriptionPanel.setBackground(Color.WHITE);
 
-        JPanel selectPane = new JPanel(new BorderLayout());
-        JPanel itemCountPane = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        JPanel selectPanel = new JPanel(new BorderLayout());
+        JPanel itemCartPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        JPanel itemInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-        selectPane.setBackground(Color.WHITE);
-        itemCountPane.setBackground(Color.WHITE);
+        selectPanel.setBackground(Color.WHITE);
+        itemCartPanel.setBackground(Color.WHITE);
+        itemInfoPanel.setBackground(Color.WHITE);
 
         JButton addItem = new JButton("+");
         addItem.setFont(UserSettings.FONT_30);
@@ -439,8 +449,18 @@ public class StoreView {
         JButton addToCart = new JButton("Add to Cart");
         addToCart.setFont(UserSettings.FONT_16);
         addToCart.setPreferredSize(new Dimension(130, 32));
-        // TODO: add stock count
-        // TODO: add price
+
+        JLabel stockLabel = new JLabel(Integer.toString(stock));
+        stockLabel.setFont(UserSettings.FONT_16);
+        setLabelWidth(stockLabel);
+        stockLabel.setBorder(BorderFactory.createTitledBorder("Stock"));
+
+        String priceString = new DecimalFormat("#,###.00").format(product.getPrice());
+
+        JLabel priceLabel = new JLabel("$" + priceString);
+        priceLabel.setFont(UserSettings.FONT_16);
+        setLabelWidth(priceLabel);
+        priceLabel.setBorder(BorderFactory.createTitledBorder("Price"));
 
         itemCount.addFocusListener(new FocusListener() {
             @Override
@@ -462,6 +482,8 @@ public class StoreView {
                 int count = Integer.parseInt(itemCount.getText());
                 if (count < 0) {
                     count = 1;
+                } else if (count >= stock) {
+                    count = stock;
                 } else {
                     count++;
                 }
@@ -476,7 +498,9 @@ public class StoreView {
             try {
 
                 int count = Integer.parseInt(itemCount.getText());
-                if (count > 0) {
+                if (count > stock) {
+                    count = stock;
+                } else if (count > 0) {
                     count--;
                 } else {
                     count = 0;
@@ -491,26 +515,38 @@ public class StoreView {
         addToCart.addActionListener(e -> {
             try {
                 int count = Integer.parseInt(itemCount.getText());
-                if (count > 0) {
+                if (count > 0 && count <= stock) {
                     dialog("info", "Add " + count + " of product to cart.");
+                    count = 0;
+                } else if (count > stock) {
+                    String stockMessage = "There is not enough stock to add " + count + " items to your cart. Would you like to instead add " + stock + "?";
+                    if (JOptionPane.showConfirmDialog(frame, stockMessage) == JOptionPane.OK_OPTION) {
+                        count = stock;
+                    }
+                } else {
+                    count = 0;
                 }
-                count = 0;
+                // addToCart()
                 itemCount.setText(Integer.toString(count));
             } catch (NumberFormatException err) {
                 itemCount.setText("0");
             }
         });
 
-        itemCountPane.add(addItem);
-        itemCountPane.add(itemCount);
-        itemCountPane.add(removeItem);
+        itemCartPanel.add(addItem);
+        itemCartPanel.add(itemCount);
+        itemCartPanel.add(removeItem);
+        itemCartPanel.add(addToCart);
 
-        selectPane.add(itemCountPane, BorderLayout.LINE_START);
-        selectPane.add(addToCart, BorderLayout.LINE_END);
+        itemInfoPanel.add(priceLabel);
+        itemInfoPanel.add(stockLabel);
+
+        selectPanel.add(itemInfoPanel, BorderLayout.LINE_START);
+        selectPanel.add(itemCartPanel, BorderLayout.LINE_END);
 
         productDetailsPanel.add(productTitle, BorderLayout.PAGE_START);
         productDetailsPanel.add(descriptionPanel, BorderLayout.CENTER);
-        productDetailsPanel.add(selectPane, BorderLayout.PAGE_END);
+        productDetailsPanel.add(selectPanel, BorderLayout.PAGE_END);
 
         productPanel.add(productImage, BorderLayout.LINE_START);
         productPanel.add(productDetailsPanel, BorderLayout.CENTER);
