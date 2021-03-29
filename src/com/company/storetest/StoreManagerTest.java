@@ -58,7 +58,7 @@ public class StoreManagerTest {
     @Test
     public void transactionTest() {
         StoreManager store = new StoreManager();
-        StoreView user = new StoreView(store);
+        StoreView user = new StoreView(store, "test", "test");
         List<List<Object>> data = store.getInventoryInfo();
         Product prod1 = (Product) data.get(0).get(1);
         Product prod2 = (Product) data.get(1).get(1);
@@ -79,7 +79,7 @@ public class StoreManagerTest {
     @Test
     public void getUserByIDTestFunction() {
         StoreManager store = new StoreManager();
-        StoreView user = new StoreView(store);
+        StoreView user = new StoreView(store, "test", "test");
         UUID cartID = user.getCartID();
 
         assertEquals(user, store.getUserByID(cartID), "Cannot retrieve user/correct user.");
@@ -92,7 +92,7 @@ public class StoreManagerTest {
     @Test
     public void getUserByIDTestNonExist() {
         StoreManager store = new StoreManager();
-        StoreView user = new StoreView(store);
+        StoreView user = new StoreView(store, "test", "test");
 
         assertNull(store.getUserByID(UUID.randomUUID()), "Returns incorrect user");
 
