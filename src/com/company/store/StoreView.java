@@ -2,7 +2,14 @@
 
 package com.company.store;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.*;
+import java.util.List;
 
 /**
  * Class to manage each user session and ShoppingCart
@@ -30,15 +37,28 @@ public class StoreView {
      */
     private final ShoppingCart cart;
 
+    private static final JFrame frame = new JFrame();
+
+    private final String username;
+
+    private final char[] password;
+
     /**
      * Constructor that generates a unique cartID and initializes a new ShoppingCart object
      * @param store StoreManager to be associated with the user
      */
-    public StoreView(StoreManager store) {
+    public StoreView(StoreManager store, String username, String password) {
         this.store = store;
         this.cartID = UUID.randomUUID();
         store.addUser(this);
         this.cart = new ShoppingCart();
+
+        this.username = username;
+        this.password = new char[password.length()];
+        for (int i = 0; i < password.length(); i++) {
+            this.password[i] = password.charAt(i);
+        }
+
         // the following are the various available universal user preferences for UI customization
         userPreferences.put("lineLength", 60); // changes character size of UI
         userPreferences.put("company", "LARGE RETAIL CORPORATION"); // company title
@@ -61,96 +81,198 @@ public class StoreView {
      */
     public static void main(String[] args) {
 
+        frameInit();
+
         StoreManager storeManager = new StoreManager();
-        StoreView user1 = new StoreView(storeManager);
-        StoreView user2 = new StoreView(storeManager);
-        StoreView user3 = new StoreView(storeManager);
+        StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
+        StoreView user2 = new StoreView(storeManager, "Julian", "pass");
+        StoreView user3 = new StoreView(storeManager, "RandomUser", "pass");
 
         List<StoreView> users = new ArrayList<>();
         users.add(user1);
         users.add(user2);
         users.add(user3);
 
-        Scanner input = new Scanner(System.in);
+        displayLogin(users);
 
-        message("info", "Welcome to the " + userPreferences.get("company") + " storefront. " +
-                "Start off by logging into an available user session.", true);
+    }
 
-        int userSessions = users.size();
+    private static void frameInit() {
 
-        while (userSessions > 0) {
+        ImageIcon img = new ImageIcon("icon.png");
+        frame.setIconImage(img.getImage());
 
-            System.out.printf("\nLog into user (1-%s): ", users.size());
+        frame.setTitle((String) userPreferences.get("company"));
+        frame.setMinimumSize(new Dimension(960, 540));
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-            try {
-
-                int choice = input.nextInt();
-
-                if (choice <= users.size() && choice >= 1) {
-
-                    if (users.get(choice - 1) != null) {
-
-                        message("info", "Logged into user " + choice + "!", true);
-
-                        if (!users.get(choice - 1).displayGUI()) {
-                            users.set(choice - 1, null);
-                            userSessions--;
-                        }
-
-                    } else message("error", "This user has quit and is no longer available.");
-
-                } else message("error", "Choice out of range. Select between 1-" + users.size());
-
-            } catch (InputMismatchException err) {
-                if (!input.next().equals("exit"))
-                    message("error", "Invalid selection; choose a number between 1-" + users.size());
-                else {
-                    message("warn", "Exit has been requested. Store will log out all user sessions.", true);
-                    userSessions = 0;
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                String quitMessage = "Are you sure you want to exit?";
+                if (JOptionPane.showConfirmDialog(frame, quitMessage) == JOptionPane.OK_OPTION) {
+                    frame.setVisible(false);
+                    frame.dispose();
                 }
+            }
+        });
+    }
 
-            } catch (Exception err) {
-                message("error", "An unexpected critical error occurred: " + err.toString());
+    private static void displayLogin(List<StoreView> users) {
+
+        Font font16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
+        Font font30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
+
+        Color backColor = new Color(71, 71, 71);
+
+        JPanel loginPanel = new JPanel(new GridBagLayout());
+        loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        loginPanel.setBackground(backColor);
+
+        JPanel borderPanel = new JPanel(new GridBagLayout());
+        borderPanel.setBackground(backColor);
+
+        JPanel hintPanel = new JPanel();
+        JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and RandomUser all with password: pass");
+        hintLabel.setForeground(Color.lightGray);
+        hintPanel.add(hintLabel);
+        hintPanel.setBackground(backColor);
+
+        JButton loginButton = new JButton("Login");
+        loginButton.setFont(font30);
+
+        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + userPreferences.get("company") + "!</center></html>", SwingConstants.CENTER);
+        welcomeLabel.setForeground(Color.WHITE);
+        welcomeLabel.setFont(font30);
+
+        JLabel loginLabel = new JLabel("LOGIN:");
+        loginLabel.setForeground(Color.WHITE);
+        loginLabel.setFont(font30);
+
+        JTextField username = new JTextField(80);
+        username.setText("Username");
+        username.setForeground(Color.GRAY);
+        username.setFont(font16);
+        username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        username.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (username.getText().equals("Username")) {
+                    username.setText("");
+                    username.setForeground(Color.BLACK);
+                }
             }
 
-        }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (username.getText().isEmpty()) {
+                    username.setForeground(Color.GRAY);
+                    username.setText("Username");
+                }
+            }
+        });
 
-        message("info", "All users have logged out. Store is terminating. " +
-                "Thank you for shopping at " + userPreferences.get("company") + ".", true);
+        JPasswordField password = new JPasswordField(80);
+        password.setText("--------");
+        password.setForeground(Color.GRAY);
+        password.setFont(font16);
+        password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
+        password.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (Arrays.equals(password.getPassword(), "--------".toCharArray())) {
+                    password.setText("");
+                    password.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (Arrays.equals(password.getPassword(), "".toCharArray())) {
+                    password.setForeground(Color.GRAY);
+                    password.setText("--------");
+                }
+            }
+        });
+
+        loginButton.addActionListener(e -> {
+
+            String givenUser = username.getText();
+            char[] givenPass = password.getPassword();
+
+            StoreView loggedInUser = null;
+            for (StoreView user : users) {
+                if (user.verifyUsername(givenUser) && user.verifyPassword(givenPass)) {
+                    loggedInUser = user;
+                    break;
+                }
+            }
+
+            password.setText("--------");
+            password.setForeground(Color.GRAY);
+
+            if (loggedInUser != null) {
+                dialog("info", username.getText() + " logged in successfully!");
+                username.setText("Username");
+                username.setForeground(Color.GRAY);
+
+                loggedInUser.displayGUI();
+
+            } else {
+                if (givenUser.equals("Username") || Arrays.equals(givenPass, "--------".toCharArray())) {
+                    dialog("info", "Username/password fields cannot be empty.");
+                } else {
+                    dialog("info", "Incorrect username/password.");
+                }
+            }
+
+        });
+
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        loginPanel.add(welcomeLabel, gbc);
+        gbc.gridy = 1;
+        loginPanel.add(loginLabel, gbc);
+        gbc.gridy = 2;
+        loginPanel.add(username, gbc);
+        gbc.gridy = 3;
+        loginPanel.add(password, gbc);
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        loginPanel.add(loginButton, gbc);
+
+        loginPanel.setPreferredSize(new Dimension(400, 400));
+
+        borderPanel.add(loginPanel);
+
+        frame.add(borderPanel, BorderLayout.CENTER);
+        frame.add(hintPanel, BorderLayout.SOUTH);
+
+        frame.pack();
+        loginButton.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(loginButton);
+        frame.setVisible(true);
+        frame.toFront();
     }
 
-    /**
-     * Method to generate a 3 column padded table row
-     * @param offset offset from the left side
-     * @return String for String.format() function
-     */
-    private String generateFormat(int offset) {
-
-        double lineLength = (double) (int) userPreferences.get("lineLength") - offset;
-
-        // tweak ratios to change column sizing; note: must add up to 1
-        int stockSize = (int) Math.round(lineLength * 0.2);
-        int nameSize = (int) Math.round(lineLength * 0.5);
-        int priceSize = (int) Math.round(lineLength * 0.3);
-        // sample string output: "%-15s| %-15s| %-15s" where each column is 15 chars wide left aligned
-        // regardless of the content contained
-        return "%-" + stockSize + "s| %-" + nameSize + "s| %-" + priceSize + "s";
+    private boolean verifyUsername(String givenUsername) {
+        return givenUsername.toLowerCase(Locale.ROOT).equals(username.toLowerCase(Locale.ROOT));
     }
 
-    /**
-     * Method to produce the product line string for GUI
-     * @param productInfo List of information to display
-     * @return Final concatenated string
-     */
-    private String productString(List<Object> productInfo, int offset) {
-
-        int numItems = (Integer) productInfo.get(0);
-        Product product = (Product) productInfo.get(1);
-
-        // using a custom generated formatted string, input values for a final properly spaced string of fixed size
-        return String.format(generateFormat(offset), numItems, product.getName(), "$" + product.getPrice());
-
+    private boolean verifyPassword(char[] givenPassword) {
+        return Arrays.equals(givenPassword, password);
     }
 
     /**
@@ -164,91 +286,15 @@ public class StoreView {
      */
     public List<List<Object>> getCartInfo() { return cart.getCartInfo(); }
 
-    /**
-     * Method to add space padding to long user info messages.
-     * Example (lineLength of 30):
-     * THIS IS A MESSAGE THAT IS AN EXAMPLE FOR A LONG STRING THAT NEEDS PADDING
-     * Returns:
-     * THIS IS A MESSAGE THAT
-     *         IS AN EXAMPLE FOR A
-     *         LONG STRING THAT NEEDS
-     *         PADDING
-     * @param rawMessage string to add padding to
-     * @return padded string
-     */
-    private static String addPadding(String rawMessage) {
-        int lineLength = (int) userPreferences.get("lineLength");
-        int textLength = lineLength - 8;
-        String paddedMessage = rawMessage;
-        if (rawMessage.length() > textLength) {
-            int index = rawMessage.lastIndexOf(' ', textLength);
-            index = index == -1 ? textLength : index;
-            paddedMessage = rawMessage.substring(0, index + 1)
-                    + "\n        "
-                    + addPadding(rawMessage.substring(index + 1));
-        }
-        return paddedMessage;
-    }
-
-    /**
-     * Method to place an informational/error/warning message
-     * @param type string type of message; accepted: error, info, warn
-     * @param message body of message to display
-     */
-    public static void message(String type, String message) {
-        String paddedMessage = addPadding(message);
-        switch (type) {
-            case "error" -> System.out.println("# ERR:  " + paddedMessage);
-            case "info" -> System.out.println("# INFO: " + paddedMessage);
-            case "warn" -> System.out.println("# WARN: " + paddedMessage);
-        }
-    }
-
-    /**
-     * Method to place an informational/error/warning message with linebreak suffixed
-     * @param type string type of message; accepted: error, info, warn
-     * @param message body of message to display
-     * @param includeLineBreak enables the linebreak
-     */
-    public static void message(String type, String message, boolean includeLineBreak) {
-        if (includeLineBreak) System.out.print("\n");
-        message(type, message);
-    }
-
-    /**
-     * Method to generate the header of a new window
-     * @param title title of the new window
-     */
-    private void generateHeader(String title) {
-        int lineWidth = (int) userPreferences.get("lineLength");
-        String company = (String) userPreferences.get("company");
-        char endChar = (char) userPreferences.get("endChar");
-        char dashChar = (char) userPreferences.get("dashChar");
-
-        int titleDashNum = lineWidth - title.length() - 2;
-        int companyDashNum = lineWidth - company.length() - 2;
-
-        System.out.print("\n" + endChar);
-        for (int i = 1; i < lineWidth - company.length(); i++) {
-            if (i == companyDashNum / 2) System.out.print(company);
-            else System.out.print(dashChar);
-        }
-        System.out.print(endChar + "\n");
-
-        System.out.print(endChar);
-        for (int i = 1; i < lineWidth - title.length(); i++) {
-            if (i == titleDashNum / 2) System.out.print(title);
-            else System.out.print(dashChar);
-        }
-        System.out.print(endChar + "\n");
-    }
-
-    /**
-     * Method to initialize and display the user interface
-     * @return when user logs out true is returned, when user quits false is returned
-     */
     public boolean displayGUI() {
 
+        frame.getContentPane().removeAll();
+        frame.repaint();
+        return true;
+
+    }
+
+    public boolean displayGUI(boolean bool) {
         List<List<Object>> inventoryArray = store.getInventoryInfo();
         List<List<Object>> cartItemArray = cart.getCartInfo();
 
@@ -259,10 +305,10 @@ public class StoreView {
         String helpString = "Available commands: browse, additem, removeitem, cart, checkout, logout, quit, help";
         String noteString = "To cancel within a command (such as selecting Options or Units) use 'cancel' to stop the operation";
 
-        message("info", String.format("Welcome to the %s, where the customer is always right! We have money to " +
-                "make and small businesses to crush so you better get started.", userPreferences.get("company")), true);
-        message("info", helpString, true);
-        message("info", noteString, true);
+//        message("info", String.format("Welcome to the %s, where the customer is always right! We have money to " +
+//                "make and small businesses to crush so you better get started.", userPreferences.get("company")), true);
+//        message("info", helpString, true);
+//        message("info", noteString, true);
 
         while (!quitFlag) {
             System.out.print("\nInput Command: ");
@@ -270,22 +316,22 @@ public class StoreView {
                 case "browse" -> { // command to view the current inventory and stock
 
                     // generates the title and formatted UI using user specifications
-                    generateHeader("BROWSE");
-                    System.out.printf(" " + generateFormat(1) + "\n", "Stock", "Product Name", "Price");
+//                    generateHeader("BROWSE");
+//                    System.out.printf(" " + generateFormat(1) + "\n", "Stock", "Product Name", "Price");
                     System.out.print(" ");
                     for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
                         System.out.print(userPreferences.get("separateChar"));
                     System.out.print("\n");
 
-                    for (List<Object> item : inventoryArray)
-                        System.out.println(" " + productString(item, 1));
+                    for (List<Object> item : inventoryArray);
+//                        System.out.println(" " + productString(item, 1));
 
                 }
                 case "additem" -> { // command for adding items to the cart
 
                     // generates the title and formatted UI using user specifications
-                    generateHeader("ADD");
-                    System.out.printf(" Option | " + generateFormat(10) + "\n", "Stock", "Product Name", "Price");
+//                    generateHeader("ADD");
+//                    System.out.printf(" Option | " + generateFormat(10) + "\n", "Stock", "Product Name", "Price");
                     System.out.print(" ");
                     for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
                         System.out.print(userPreferences.get("separateChar"));
@@ -293,7 +339,7 @@ public class StoreView {
 
                     int i = 1;
                     for (List<Object> item : inventoryArray)
-                        System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
+//                        System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
 
                     // acquire inputs, if arguments invalid handle exceptions
                     try {
@@ -306,17 +352,17 @@ public class StoreView {
                         int numUnits = input.nextInt();
                         cart.addToCart(store, selectedProduct, numUnits);
 
-                        message("info", String.format("Added %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
+//                        message("info", String.format("Added %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
 
                     } catch (IllegalArgumentException err) {
-                        message("error", err.getMessage());
+//                        message("error", err.getMessage());
                     } catch (InputMismatchException err) {
-                        if (!input.next().equals("cancel"))
-                            message("error", "Invalid input; must be an integer.");
+                        if (!input.next().equals("cancel")) {}
+//                            message("error", "Invalid input; must be an integer.");
                     } catch (IndexOutOfBoundsException err) {
-                        message("error", "Invalid option; must be between 1 and " + inventoryArray.size());
+//                        message("error", "Invalid option; must be between 1 and " + inventoryArray.size());
                     } catch (Exception err) {
-                        message("error", err.toString());
+//                        message("error", err.toString());
                     }
 
                     // refresh inventory and cart list after modification
@@ -327,13 +373,13 @@ public class StoreView {
                 case "removeitem" -> { // command for removing items from the cart
 
                     // generates the title
-                    generateHeader("REMOVE");
+//                    generateHeader("REMOVE");
 
                     // check if cart contains any entries
                     if (cartItemArray.size() != 0) {
 
                         // generates formatted UI using user specifications
-                        System.out.printf(" Option | " + generateFormat(10) + "\n", "Units", "Product Name", "Price");
+//                        System.out.printf(" Option | " + generateFormat(10) + "\n", "Units", "Product Name", "Price");
                         System.out.print(" ");
                         for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
                             System.out.print(userPreferences.get("separateChar"));
@@ -341,7 +387,7 @@ public class StoreView {
 
                         int i = 1;
                         for (List<Object> item : cartItemArray)
-                            System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
+//                            System.out.printf(" %-7s| %s\n", "(" + i++ + ")", productString(item, 10));
 
                         // acquire inputs, if arguments invalid handle exceptions
                         try {
@@ -354,45 +400,48 @@ public class StoreView {
                             int numUnits = input.nextInt();
                             cart.removeFromCart(store, selectedProduct, numUnits);
 
-                            message("info", String.format("Removed %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
+//                            message("info", String.format("Removed %d units of %s successfully.", numUnits, selectedProduct.getName()), true);
 
                         } catch (IllegalArgumentException err) {
-                            message("error", err.getMessage());
+//                            message("error", err.getMessage());
                         } catch (InputMismatchException err) {
-                            if (!input.next().equals("cancel"))
-                                message("error", "Invalid input; must be an integer.");
+                            if (!input.next().equals("cancel")) {}
+//                                message("error", "Invalid input; must be an integer.");
                         } catch (IndexOutOfBoundsException err) {
-                            message("error", "Invalid option; must be between 1 and " + cartItemArray.size());
+//                            message("error", "Invalid option; must be between 1 and " + cartItemArray.size());
                         } catch (Exception err) {
-                            message("error", err.toString());
+//                            message("error", err.toString());
                         }
 
                         // refresh inventory and cart list after modification
                         inventoryArray = store.getInventoryInfo();
                         cartItemArray = cart.getCartInfo();
 
-                    } else message("info", "There is nothing in your cart to remove.");
+                    }
+//                    else message("info", "There is nothing in your cart to remove.");
 
                 }
                 case "cart" -> { // command to view the current cart state
 
                     // generates the title
-                    generateHeader("CART");
+//                    generateHeader("CART");
 
                     // check if cart contains any entries
                     if (cartItemArray.size() != 0) {
 
                         // generates formatted UI using user specifications
-                        System.out.printf(" " + generateFormat(1) + "\n", "Units", "Product Name", "Price");
+//                        System.out.printf(" " + generateFormat(1) + "\n", "Units", "Product Name", "Price");
                         System.out.print(" ");
                         for (int i = 0; i < (int) userPreferences.get("lineLength") - 2; i++)
                             System.out.print(userPreferences.get("separateChar"));
                         System.out.print("\n");
 
-                        for (List<Object> cartItem : cartItemArray)
-                            System.out.println(" " + productString(cartItem, 1));
+                        for (List<Object> cartItem : cartItemArray);
+//                            System.out.println(" " + productString(cartItem, 1));
 
-                    } else message("info", "Cart is empty.");
+                    }
+//                    else
+//                        message("info", "Cart is empty.");
 
                 }
                 case "checkout" -> { // command that completes a transactions with the current cart state
@@ -401,7 +450,7 @@ public class StoreView {
                     double total = store.transaction(this);
 
                     System.out.printf("\nCheckout total: $%.2f%n", total);
-                    message("info", "Transaction complete.");
+//                    message("info", "Transaction complete.");
 
                     // refresh inventory and cart list after modification
                     inventoryArray = store.getInventoryInfo();
@@ -411,16 +460,26 @@ public class StoreView {
                 case "logout" -> quitFlag = true; // closes UI, keeps user alive
                 case "quit" -> { return false; } // closes UI and kills client
                 case "help" -> {
-                    message("info", helpString); // help string contains list of all valid commands
-                    message("info", noteString);
+//                    message("info", helpString); // help string contains list of all valid commands
+//                    message("info", noteString);
                 }
                 default -> {
                     // if the command is not found in the list of inputs notify user
-                    message("error", "No such command exists.");
-                    message("info", "Use 'help' command for a list of valid options.");
+//                    message("error", "No such command exists.");
+//                    message("info", "Use 'help' command for a list of valid options.");
                 }
             }
         }
         return true;
     }
+
+    public static void dialog(String type, String message) {
+        switch (type) {
+            case "error" -> JOptionPane.showMessageDialog(frame, "ERROR: " + message);
+            case "warn" -> JOptionPane.showMessageDialog(frame, "WARNING: " + message);
+            case "info" -> JOptionPane.showMessageDialog(frame, message);
+        }
+
+    }
+
 }
