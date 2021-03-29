@@ -89,7 +89,7 @@ public class InventoryTest {
     public void addNewProductTestFunction() {
         Inventory inventory = new Inventory();
 
-        UUID prodID = inventory.addNewProduct("name", 14.99, 5);
+        UUID prodID = inventory.addNewProduct("name", 14.99, 5, "test", "test");
 
         List<List<Object>> data = inventory.getInventoryInfo();
 
@@ -106,7 +106,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class, () ->
-                inventory.addNewProduct("name", -14.99, 5),
+                inventory.addNewProduct("name", -14.99, 5, "test", "test"),
                 "Fails to check for negative price");
     }
 
@@ -119,7 +119,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class, () ->
-                inventory.addNewProduct("name", 14.99, -5),
+                inventory.addNewProduct("name", 14.99, -5, "test", "test"),
                 "Fails to check for negative stock");
     }
 
@@ -132,7 +132,7 @@ public class InventoryTest {
         Inventory inventory = new Inventory();
 
         assertThrows(IllegalArgumentException.class, () ->
-                        inventory.addNewProduct(null, 14.99, 5),
+                        inventory.addNewProduct(null, 14.99, 5, "test", "test"),
                 "Fails to check for null name");
     }
 

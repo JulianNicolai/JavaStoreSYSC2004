@@ -21,14 +21,14 @@ public class Inventory {
     public Inventory() {
         this.productList = new ArrayList<>();
         try {
-            this.addNewProduct("milk", 15.99, 10);
-            this.addNewProduct("cheese", 12.95, 80);
-            this.addNewProduct("PHAT sandwich", 89.99, 3);
-            this.addNewProduct("bread", 5.99, 14);
-            this.addNewProduct("god nuggs", 69.69, 2);
-            this.addNewProduct("4 gal mountain dew", 420.69, 8);
-            this.addNewProduct("kids meal", 2.99, 429);
-            this.addNewProduct("lettuce", 6.79, 23);
+            this.addNewProduct("milk", 15.99, 10, "images/product_images/milk.jpg", "Milk is an emulsion or colloid of butterfat globules within a water-based fluid that contains dissolved carbohydrates and protein aggregates with minerals.");
+            this.addNewProduct("cheese", 12.95, 80, "images/product_images/cheese.jpg", "Cheese is a dairy product, derived from milk and produced in wide ranges of flavors, textures and forms by coagulation of the milk protein casein.");
+            this.addNewProduct("PHAT sandwich", 89.99, 3, "images/product_images/sandwich.jpg", "A sandwich is a food typically consisting of vegetables, sliced cheese or meat, placed on or between slices of bread, or more generally any dish wherein bread serves as a container or wrapper for another food type.");
+            this.addNewProduct("bread", 5.99, 14, "images/product_images/bread.jpg", "Bread is the product of baking a mixture of flour, water, salt, yeast and other ingredients and kneaded until a ball of dough is formed.");
+            this.addNewProduct("god nuggs", 69.69, 2, "images/product_images/nuggets.jpg", "A chicken nugget is a food product consisting of a small piece of deboned chicken meat that is breaded or battered, then deep-fried or baked. ");
+            this.addNewProduct("55 gal mountain dew", 420.69, 8, "images/product_images/dew.jpg", "Mountain Dew is a citrus-flavored soft drink, made by the PepsiCo company. The drink has more caffeine (a stimulant) than other soft drinks like Pepsi and Coca-Cola.");
+            this.addNewProduct("kids meal", 2.99, 429, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
+            this.addNewProduct("lettuce", 6.79, 23, "images/product_images/lettuce.jpg", "Lettuce, Lactuca sativa, is a leafy herbaceous annual or biennial plant in the family Asteraceae grown for its leaves which are used as a salad green.");
         } catch (IllegalArgumentException err) {
             StoreView.dialog("error", err.getMessage());
         }
@@ -87,9 +87,11 @@ public class Inventory {
      * @param name Name of product
      * @param price Price of product
      * @param stock Amount of stock available for product
+     * @param description String description of product
+     * @param image String product image file location
      * @return generated ID of added product
      */
-    public UUID addNewProduct(String name, double price, int stock) {
+    public UUID addNewProduct(String name, double price, int stock, String image, String description) {
 
         if (price < 0.0 || stock < 0)
             throw new IllegalArgumentException("Stock and price cannot be less than 0.");
@@ -97,7 +99,7 @@ public class Inventory {
             throw new IllegalArgumentException("Product name cannot be null.");
         } else {
             UUID id = UUID.randomUUID();
-            Product newProduct = new Product(id, name, price);
+            Product newProduct = new Product(id, name, price, image, description);
             ProductEntry newProductEntry = new ProductEntry(newProduct, stock);
             this.productList.add(newProductEntry);
             return id;
