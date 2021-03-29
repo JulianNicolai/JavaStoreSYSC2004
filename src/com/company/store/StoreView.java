@@ -3,6 +3,8 @@
 package com.company.store;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -57,8 +59,11 @@ public class StoreView {
     private static class UserSettings {
         public final static String COMPANY = "LARGE RETAIL CORPORATION";
         public final static Font FONT_16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
+        public final static Font FONT_22 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 22);
         public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
         public final static Color BACK_COLOR = new Color(71, 71, 71);
+        public final static int HEIGHT = 540;
+        public final static int WIDTH = 960;
     }
 
     /**
@@ -68,6 +73,8 @@ public class StoreView {
     public UUID getCartID() { return cartID; }
 
     public ShoppingCart getCart() { return cart; }
+
+    public String getUsername() { return username; }
 
     /**
      * Main entry point to initialize and run program
@@ -87,17 +94,19 @@ public class StoreView {
         users.add(user2);
         users.add(user3);
 
-        displayLogin(users);
+        user1.displayGUI();
+
+//        displayLogin(users);
 
     }
 
     private static void frameInit() {
 
-        ImageIcon img = new ImageIcon("icon.png");
+        ImageIcon img = new ImageIcon("images/icon.png");
         frame.setIconImage(img.getImage());
 
-        frame.setTitle(UserSettings.COMPANY);
-        frame.setMinimumSize(new Dimension(960, 540));
+        frame.setTitle(UserSettings.COMPANY + " Store");
+        frame.setMinimumSize(new Dimension(UserSettings.WIDTH, UserSettings.HEIGHT));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -114,6 +123,9 @@ public class StoreView {
     }
 
     private static void displayLogin(List<StoreView> users) {
+
+        frame.getContentPane().removeAll();
+        frame.repaint();
 
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -206,7 +218,7 @@ public class StoreView {
             password.setForeground(Color.GRAY);
 
             if (loggedInUser != null) {
-                dialog("info", username.getText() + " logged in successfully!");
+                dialog("info", "Welcome back " + loggedInUser.getUsername() + "!");
                 username.setText("Username");
                 username.setForeground(Color.GRAY);
 
@@ -275,12 +287,245 @@ public class StoreView {
      */
     public List<List<Object>> getCartInfo() { return cart.getCartInfo(); }
 
-    public boolean displayGUI() {
+    public void displayGUI() {
 
         frame.getContentPane().removeAll();
         frame.repaint();
-        return true;
 
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(UserSettings.BACK_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
+
+        JPanel productsPanel = new JPanel();
+        productsPanel.setLayout(new BoxLayout(productsPanel, BoxLayout.Y_AXIS));
+        productsPanel.setBackground(Color.LIGHT_GRAY);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        buttonPanel.setBackground(UserSettings.BACK_COLOR);
+
+        JToggleButton cartButton = new JToggleButton("My Cart");
+
+        JButton logoutButton = new JButton("<html><center>Logout of<br>" + username + "</center></html>");
+
+        logoutButton.addActionListener(e -> {
+            String logoutMessage = "Are you sure you want to logout?";
+            if (JOptionPane.showConfirmDialog(frame, logoutMessage) == JOptionPane.OK_OPTION) {
+                displayLogin(store.getUsers());
+            }
+        });
+
+        buttonPanel.add(logoutButton);
+        buttonPanel.add(cartButton);
+
+        JLabel storeLabel = new JLabel(UserSettings.COMPANY + " Store");
+        storeLabel.setFont(UserSettings.FONT_30);
+        storeLabel.setForeground(Color.WHITE);
+
+        headerPanel.add(storeLabel, BorderLayout.LINE_START);
+        headerPanel.add(buttonPanel, BorderLayout.LINE_END);
+
+        JPanel cartPanel = new JPanel(new BorderLayout());
+        cartPanel.setPreferredSize(new Dimension(300, 300));
+
+        JLabel cartHeadLabel = new JLabel("Current Cart: ");
+        cartHeadLabel.setFont(UserSettings.FONT_22);
+        cartHeadLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JPanel cartProductPanel = new JPanel();
+        cartProductPanel.setLayout(new BoxLayout(cartProductPanel, BoxLayout.Y_AXIS));
+        cartProductPanel.setBackground(Color.LIGHT_GRAY);
+
+        JLabel cartTotalLabel = new JLabel("Total: ");
+        cartTotalLabel.setFont(UserSettings.FONT_22);
+        cartTotalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JScrollPane scrollCartPane = new JScrollPane(cartProductPanel);
+        scrollCartPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollCartPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollCartPane.getVerticalScrollBar().setUnitIncrement(20);
+
+        cartPanel.add(cartHeadLabel, BorderLayout.PAGE_START);
+        cartPanel.add(scrollCartPane, BorderLayout.CENTER);
+        cartPanel.add(cartTotalLabel, BorderLayout.PAGE_END);
+
+        cartButton.addActionListener(e -> {
+            AbstractButton button = (AbstractButton) e.getSource();
+            cartPanel.setVisible(button.getModel().isSelected());
+            cartProductPanel.add(createCartProductPanel());
+        });
+
+        for (int i = 0; i < 8; i++) {
+            cartProductPanel.add(createCartProductPanel());
+        }
+
+        Product product = new Product(UUID.randomUUID(), "kids meal", 2.99, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
+        int stock = 15;
+
+        for (int i = 0; i < 8; i++) {
+            productsPanel.add(createProductPanel(product, stock));
+        }
+
+        JScrollPane scrollProductPane = new JScrollPane(productsPanel);
+        scrollProductPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollProductPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollProductPane.getVerticalScrollBar().setUnitIncrement(20);
+
+        mainPanel.add(headerPanel, BorderLayout.PAGE_START);
+        mainPanel.add(scrollProductPane, BorderLayout.CENTER);
+        mainPanel.add(cartPanel, BorderLayout.LINE_END);
+
+        cartPanel.setVisible(false);
+
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setSize(new Dimension(UserSettings.WIDTH, UserSettings.HEIGHT));
+        // FIXME: make dimensions stay the same on logout
+        // FIXME: make minimum size function correctly if possible
+        frame.setVisible(true);
+
+    }
+
+    private JPanel createProductPanel(Product product, int stock) {
+
+        JPanel productPanel = new JPanel(new BorderLayout());
+        productPanel.setPreferredSize(new Dimension(0, 200));
+        productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        productPanel.setBackground(Color.WHITE);
+        productPanel.setBorder(new CompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 2),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
+        ImageIcon img = new ImageIcon(product.getImage());
+        ImageIcon productImageIcon = new ImageIcon(img.getImage().getScaledInstance(180, 180, Image.SCALE_DEFAULT));
+
+        JLabel productImage = new JLabel(productImageIcon);
+
+        JPanel productDetailsPanel = new JPanel(new BorderLayout());
+        productDetailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        productDetailsPanel.setBackground(Color.WHITE);
+
+        JLabel productTitle = new JLabel(product.getName());
+        productTitle.setFont(UserSettings.FONT_22);
+
+        JLabel productDescription = new JLabel("<html><body width='100%'>" + product.getDescription() +  "</body></html>");
+        productDescription.setFont(UserSettings.FONT_16);
+
+        JPanel descriptionPanel = new JPanel(new BorderLayout());
+        descriptionPanel.add(productDescription, BorderLayout.PAGE_START);
+        descriptionPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        descriptionPanel.setBackground(Color.WHITE);
+
+        JPanel selectPane = new JPanel(new BorderLayout());
+        JPanel itemCountPane = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+        selectPane.setBackground(Color.WHITE);
+        itemCountPane.setBackground(Color.WHITE);
+
+        JButton addItem = new JButton("+");
+        addItem.setFont(UserSettings.FONT_30);
+        addItem.setPreferredSize(new Dimension(55, 32));
+
+        JButton removeItem = new JButton("\u2012");
+        removeItem.setFont(UserSettings.FONT_30);
+        removeItem.setPreferredSize(new Dimension(55, 32));
+
+        JTextField itemCount = new JTextField("0");
+        itemCount.setFont(UserSettings.FONT_22);
+        itemCount.setPreferredSize(new Dimension(60, 32));
+        itemCount.setHorizontalAlignment(JTextField.CENTER);
+
+        JButton addToCart = new JButton("Add to Cart");
+        addToCart.setFont(UserSettings.FONT_16);
+        addToCart.setPreferredSize(new Dimension(130, 32));
+        // TODO: add stock count
+        // TODO: add price
+
+        itemCount.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (itemCount.getText().equals("")) {
+                    itemCount.setText("0");
+                }
+            }
+        });
+
+        addItem.addActionListener(e -> {
+            try {
+
+                int count = Integer.parseInt(itemCount.getText());
+                if (count < 0) {
+                    count = 1;
+                } else {
+                    count++;
+                }
+                itemCount.setText(Integer.toString(count));
+
+            } catch (NumberFormatException err) {
+                itemCount.setText("0");
+            }
+        });
+
+        removeItem.addActionListener(e -> {
+            try {
+
+                int count = Integer.parseInt(itemCount.getText());
+                if (count > 0) {
+                    count--;
+                } else {
+                    count = 0;
+                }
+                itemCount.setText(Integer.toString(count));
+
+            } catch (NumberFormatException err) {
+                itemCount.setText("0");
+            }
+        });
+
+        addToCart.addActionListener(e -> {
+            try {
+                int count = Integer.parseInt(itemCount.getText());
+                if (count > 0) {
+                    dialog("info", "Add " + count + " of product to cart.");
+                }
+                count = 0;
+                itemCount.setText(Integer.toString(count));
+            } catch (NumberFormatException err) {
+                itemCount.setText("0");
+            }
+        });
+
+        itemCountPane.add(addItem);
+        itemCountPane.add(itemCount);
+        itemCountPane.add(removeItem);
+
+        selectPane.add(itemCountPane, BorderLayout.LINE_START);
+        selectPane.add(addToCart, BorderLayout.LINE_END);
+
+        productDetailsPanel.add(productTitle, BorderLayout.PAGE_START);
+        productDetailsPanel.add(descriptionPanel, BorderLayout.CENTER);
+        productDetailsPanel.add(selectPane, BorderLayout.PAGE_END);
+
+        productPanel.add(productImage, BorderLayout.LINE_START);
+        productPanel.add(productDetailsPanel, BorderLayout.CENTER);
+
+        return productPanel;
+    }
+
+    private JPanel createCartProductPanel() {
+        JPanel productPanel = new JPanel(new GridBagLayout());
+        productPanel.setPreferredSize(new Dimension(0, 75));
+        productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
+        productPanel.setBackground(new Color((int)(Math.random() * 256), (int)(Math.random() * 256), (int)(Math.random() * 256)));
+        return productPanel;
+
+        // TODO: add cart panel
     }
 
     /*
