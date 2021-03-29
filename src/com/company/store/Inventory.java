@@ -30,7 +30,7 @@ public class Inventory {
             this.addNewProduct("kids meal", 2.99, 429);
             this.addNewProduct("lettuce", 6.79, 23);
         } catch (IllegalArgumentException err) {
-            StoreView.message("error", err.getMessage());
+            StoreView.dialog("error", err.getMessage());
         }
 
     }
