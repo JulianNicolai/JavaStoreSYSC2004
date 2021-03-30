@@ -307,9 +307,14 @@ public class StoreView {
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         buttonPanel.setBackground(UserSettings.BACK_COLOR);
 
-        JToggleButton cartButton = new JToggleButton("<html><center>View<br>My Cart</center><html>");
+        ImageIcon cartImg = new ImageIcon("images/cart.png");
+        ImageIcon logoutImg = new ImageIcon("images/logout.png");
 
-        JButton logoutButton = new JButton("<html><center>Logout of<br>" + username + "</center></html>");
+        JToggleButton cartButton = new JToggleButton("<html><center>View<br>My Cart</center><html>", cartImg);
+        cartButton.setMargin(new Insets(1, 5, 1, 5));
+
+        JButton logoutButton = new JButton("<html><center>Logout of<br>" + username + "</center></html>", logoutImg);
+        logoutButton.setMargin(new Insets(1, 5, 1, 5));
 
         logoutButton.addActionListener(e -> {
             String logoutMessage = "Are you sure you want to logout?";
