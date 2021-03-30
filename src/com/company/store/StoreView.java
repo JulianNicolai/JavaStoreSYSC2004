@@ -50,19 +50,29 @@ public class StoreView {
         this.username = username;
         this.password = new char[password.length()];
         for (int i = 0; i < password.length(); i++) this.password[i] = password.charAt(i);
-
     }
 
     private static class UserSettings {
+
         public final static String COMPANY = "LARGE RETAIL CORPORATION";
-        public final static Font FONT_8 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 8);
-        public final static Font FONT_12 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 12);
-        public final static Font FONT_16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
-        public final static Font FONT_22 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 22);
-        public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
-        public final static Color BACK_COLOR = new Color(71, 71, 71);
         public final static int HEIGHT = 648;
         public final static int WIDTH = 1152;
+
+        public static class ColorPalette {
+            public final static Color DARKEST_BLUE = new Color(19, 41, 61);
+            public final static Color DARK_BLUE = new Color(0, 100, 148);
+            public final static Color MED_BLUE = new Color(36, 123, 180);
+            public final static Color LIGHT_BLUE = new Color(27, 152, 224);
+            public final static Color LIGHTEST_BLUE = new Color(232, 241, 242);
+        }
+
+        public static class FontList {
+            public final static Font FONT_8 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 8);
+            public final static Font FONT_12 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 12);
+            public final static Font FONT_16 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 16);
+            public final static Font FONT_22 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 22);
+            public final static Font FONT_30 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 30);
+        }
     }
 
     /**
@@ -128,32 +138,32 @@ public class StoreView {
 
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        loginPanel.setBackground(UserSettings.BACK_COLOR);
+        loginPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
 
         JPanel borderPanel = new JPanel(new GridBagLayout());
-        borderPanel.setBackground(UserSettings.BACK_COLOR);
+        borderPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
 
         JPanel hintPanel = new JPanel();
         JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and RandomUser all with password: pass");
         hintLabel.setForeground(Color.lightGray);
         hintPanel.add(hintLabel);
-        hintPanel.setBackground(UserSettings.BACK_COLOR);
+        hintPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
 
         JButton loginButton = new JButton("Login");
-        loginButton.setFont(UserSettings.FONT_30);
+        loginButton.setFont(UserSettings.FontList.FONT_30);
 
-        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + UserSettings.COMPANY + "!</center></html>", SwingConstants.CENTER);
-        welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setFont(UserSettings.FONT_30);
+        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + UserSettings.COMPANY + "!<br><br><i style='font-size: 16px'>We sell you things, <u>for money</u>!</i></center></html>", SwingConstants.CENTER);
+        welcomeLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
+        welcomeLabel.setFont(UserSettings.FontList.FONT_30);
 
         JLabel loginLabel = new JLabel("LOGIN:");
-        loginLabel.setForeground(Color.WHITE);
-        loginLabel.setFont(UserSettings.FONT_30);
+        loginLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
+        loginLabel.setFont(UserSettings.FontList.FONT_30);
 
         JTextField username = new JTextField(80);
         username.setText("Username");
         username.setForeground(Color.GRAY);
-        username.setFont(UserSettings.FONT_16);
+        username.setFont(UserSettings.FontList.FONT_16);
         username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -178,7 +188,7 @@ public class StoreView {
         JPasswordField password = new JPasswordField(80);
         password.setText("--------");
         password.setForeground(Color.GRAY);
-        password.setFont(UserSettings.FONT_16);
+        password.setFont(UserSettings.FontList.FONT_16);
         password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -297,15 +307,14 @@ public class StoreView {
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(UserSettings.BACK_COLOR);
+        headerPanel.setBackground(UserSettings.ColorPalette.DARK_BLUE);
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        buttonPanel.setBackground(UserSettings.ColorPalette.DARK_BLUE);
 
         JPanel productsPanel = new JPanel();
         productsPanel.setLayout(new BoxLayout(productsPanel, BoxLayout.Y_AXIS));
-        productsPanel.setBackground(Color.LIGHT_GRAY);
-
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        buttonPanel.setBackground(UserSettings.BACK_COLOR);
 
         ImageIcon cartImg = new ImageIcon("images/cart.png");
         ImageIcon logoutImg = new ImageIcon("images/logout.png");
@@ -327,17 +336,19 @@ public class StoreView {
         buttonPanel.add(cartButton);
 
         JLabel storeLabel = new JLabel(UserSettings.COMPANY + " Store");
-        storeLabel.setFont(UserSettings.FONT_30);
-        storeLabel.setForeground(Color.WHITE);
+        storeLabel.setFont(UserSettings.FontList.FONT_30);
+        storeLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
 
         headerPanel.add(storeLabel, BorderLayout.LINE_START);
         headerPanel.add(buttonPanel, BorderLayout.LINE_END);
 
         JPanel cartPanel = new JPanel(new BorderLayout());
         cartPanel.setPreferredSize(new Dimension(300, 300));
+        cartPanel.setBackground(UserSettings.ColorPalette.MED_BLUE);
 
         JLabel cartHeadLabel = new JLabel("Current Cart: ");
-        cartHeadLabel.setFont(UserSettings.FONT_22);
+        cartHeadLabel.setFont(UserSettings.FontList.FONT_22);
+        cartHeadLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
         cartHeadLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         JPanel cartProductPanel = new JPanel();
@@ -345,7 +356,8 @@ public class StoreView {
         cartProductPanel.setBackground(Color.LIGHT_GRAY);
 
         JLabel cartTotalLabel = new JLabel("Total: ");
-        cartTotalLabel.setFont(UserSettings.FONT_22);
+        cartTotalLabel.setFont(UserSettings.FontList.FONT_22);
+        cartTotalLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
         cartTotalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         JScrollPane scrollCartPane = new JScrollPane(cartProductPanel);
@@ -430,10 +442,10 @@ public class StoreView {
         productDetailsPanel.setBackground(Color.WHITE);
 
         JLabel productTitle = new JLabel(product.getName());
-        productTitle.setFont(UserSettings.FONT_22);
+        productTitle.setFont(UserSettings.FontList.FONT_22);
 
         JLabel productDescription = new JLabel("<html><body width='100%'>" + product.getDescription() +  "</body></html>");
-        productDescription.setFont(UserSettings.FONT_16);
+        productDescription.setFont(UserSettings.FontList.FONT_16);
 
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.add(productDescription, BorderLayout.PAGE_START);
@@ -449,25 +461,25 @@ public class StoreView {
         itemInfoPanel.setBackground(Color.WHITE);
 
         JButton addToCart = new JButton("Add to Cart");
-        addToCart.setFont(UserSettings.FONT_16);
+        addToCart.setFont(UserSettings.FontList.FONT_16);
         addToCart.setPreferredSize(new Dimension(130, 32));
 
         JLabel stockLabel = new JLabel(Integer.toString(stock));
-        stockLabel.setFont(UserSettings.FONT_16);
+        stockLabel.setFont(UserSettings.FontList.FONT_16);
         setLabelWidth(stockLabel);
         stockLabel.setBorder(BorderFactory.createTitledBorder("Stock"));
 
         String priceString = new DecimalFormat("#,###.00").format(product.getPrice());
 
         JLabel priceLabel = new JLabel("$" + priceString);
-        priceLabel.setFont(UserSettings.FONT_16);
+        priceLabel.setFont(UserSettings.FontList.FONT_16);
         setLabelWidth(priceLabel);
         priceLabel.setBorder(BorderFactory.createTitledBorder("Price"));
 
         SpinnerModel unitModel = new SpinnerNumberModel(0, 0, stock, 1);
 
         JSpinner unitSpinner = new JSpinner(unitModel);
-        unitSpinner.setFont(UserSettings.FONT_22);
+        unitSpinner.setFont(UserSettings.FontList.FONT_22);
         unitSpinner.setPreferredSize(new Dimension(80, 32));
 
         addToCart.addActionListener(e -> {
@@ -513,14 +525,14 @@ public class StoreView {
         JLabel productImage = new JLabel(productImageIcon);
 
         JLabel productTitle = new JLabel("<html><body width='100%'>" + product.getName() + "</body></html>");
-        productTitle.setFont(UserSettings.FONT_16);
+        productTitle.setFont(UserSettings.FontList.FONT_16);
         productTitle.setPreferredSize(new Dimension(180, 62));
 
         JPanel productDetailsPanel = new JPanel(new BorderLayout());
         productDetailsPanel.setBackground(Color.WHITE);
 
         JButton removeFromCart = new JButton("Remove Item");
-        removeFromCart.setFont(UserSettings.FONT_12);
+        removeFromCart.setFont(UserSettings.FontList.FONT_12);
         removeFromCart.setPreferredSize(new Dimension(90, 20));
         removeFromCart.setMargin(new Insets(1, 1, 1, 1));
 
@@ -528,7 +540,7 @@ public class StoreView {
         SpinnerModel unitModel = new SpinnerNumberModel(units, 0, stock, 1);
 
         JSpinner unitSpinner = new JSpinner(unitModel);
-        unitSpinner.setFont(UserSettings.FONT_12);
+        unitSpinner.setFont(UserSettings.FontList.FONT_12);
         unitSpinner.setPreferredSize(new Dimension(60, 20));
 
         unitSpinner.addChangeListener(e -> {
