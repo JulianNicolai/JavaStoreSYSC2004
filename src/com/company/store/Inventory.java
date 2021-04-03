@@ -30,7 +30,7 @@ public class Inventory {
             this.addNewProduct("The Kids Meal", 2.99, 429, "images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
             this.addNewProduct("Lettuce (pre wilted)", 6.79, 23, "images/product_images/lettuce.jpg", "Lettuce, Lactuca sativa, is a leafy herbaceous annual or biennial plant in the family Asteraceae grown for its leaves which are used as a salad green.");
         } catch (IllegalArgumentException err) {
-            StoreView.dialog("error", err.getMessage());
+            StoreView.dialog("system-error", err.getMessage(), "Invalid Parameter - Product Addition");
         }
 
     }

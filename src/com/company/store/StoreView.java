@@ -9,7 +9,6 @@ import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class to manage each user session and ShoppingCart
@@ -118,9 +117,9 @@ public class StoreView {
 
         frameInit();
 
-//        user1.displayGUI();
+        user1.displayGUI();
 
-        displayLogin(users);
+//        displayLogin(users);
 
     }
 
@@ -138,7 +137,8 @@ public class StoreView {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 String quitMessage = "Are you sure you want to exit?";
-                if (JOptionPane.showConfirmDialog(frame, quitMessage) == JOptionPane.OK_OPTION) {
+                int result = JOptionPane.showConfirmDialog(frame, quitMessage, "Confirm Exit", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
                     frame.setVisible(false);
                     frame.dispose();
                 }
@@ -242,7 +242,7 @@ public class StoreView {
             password.setForeground(Color.GRAY);
 
             if (loggedInUser != null) {
-                dialog("info", "Welcome back " + loggedInUser.getUsername() + "!");
+                dialog("info", "Welcome back " + loggedInUser.getUsername() + "!", "Login Successful");
                 username.setText("Username");
                 username.setForeground(Color.GRAY);
 
@@ -250,9 +250,9 @@ public class StoreView {
 
             } else {
                 if (givenUser.equals("Username") || Arrays.equals(givenPass, "--------".toCharArray())) {
-                    dialog("info", "Username/password fields cannot be empty.");
+                    dialog("user-error", "Username/password fields cannot be empty.", "Empty Field");
                 } else {
-                    dialog("info", "Incorrect username/password.");
+                    dialog("user-error", "Incorrect username/password.", "Invalid Username/Password");
                 }
             }
 
@@ -339,7 +339,8 @@ public class StoreView {
 
         logoutButton.addActionListener(e -> {
             String logoutMessage = "Are you sure you want to logout?";
-            if (JOptionPane.showConfirmDialog(frame, logoutMessage) == JOptionPane.OK_OPTION) {
+            int result = JOptionPane.showConfirmDialog(frame, logoutMessage, "Confirm Logout", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
                 displayLogin(store.getUsers());
             }
         });
@@ -422,8 +423,6 @@ public class StoreView {
         frame.add(mainPanel);
         frame.pack();
         frame.setSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
-        // FIXME: make dimensions stay the same on logout
-        // FIXME: make minimum size function correctly if possible
         frame.setVisible(true);
 
     }
@@ -667,15 +666,41 @@ public class StoreView {
     private void checkout() {
         double newTotal = calculateCartTotal();
         if (newTotal > 0) {
-            // TODO: Update cart message
-            String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
-            dialog("info", priceString);
-            cart.clear();
-            cartProductPanel.removeAll();
-            cartProductPanel.repaint();
-            updateCartTotal();
+            DecimalFormat priceFormat = new DecimalFormat("$#,##0.00");
+            String confirmMessage = "<html>Are you sure you want to checkout?<br>Total: " + priceFormat.format(newTotal) + "</html>";
+            int result = JOptionPane.showConfirmDialog(frame, confirmMessage, "Confirm Checkout", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+
+                List<List<Object>> cartInfo = cart.getCartInfo();
+
+                String htmlStart = "<html> <style>table, tr, td{text-align: left; padding: 3px; border-collapse: collapse;}.name{width: 300px; border: 1px solid black;}.item{min-width: 100px; text-align: center; border: 1px solid black;}.name-main{min-width: 300px; font-size: large;}.item-main{min-width: 100px; text-align: center; font-size: large;}</style> <table> <tr> <td class='name-main'> Product </td><td class='item-main'> Price/Unit </td><td class='item-main'> Units </td><td class='item-main'> Total </td></tr>";
+                String totalString = String.format("<tr> <td colspan='3' class='name-main'> Total: </td><td class='item-main'> %s </td></tr>", priceFormat.format(newTotal));
+                String htmlEnd = "</table></html>";
+
+                StringBuilder formattedString = new StringBuilder();
+                formattedString.append(htmlStart);
+                for (List<Object> item : cartInfo) {
+                    Product product = (Product) item.get(1);
+                    String name = product.getName();
+                    double price = product.getPrice();
+                    int units = (int) item.get(0);
+                    double subtotal = price * units;
+                    String productString = String.format("<tr> <td class='name'> %s </td><td class='item'> %s </td><td class='item'> %d </td><td class='item'> %s </td></tr>", name, priceFormat.format(price), units, priceFormat.format(subtotal));
+                    formattedString.append(productString);
+                }
+                formattedString.append(totalString);
+                formattedString.append(htmlEnd);
+
+                dialog("plain", formattedString.toString(), "Transaction Receipt");
+
+                cart.clear();
+                cartProductPanel.removeAll();
+                cartProductPanel.repaint();
+                updateCartTotal();
+            }
+
         } else {
-            dialog("info", "Your cart is empty!\nAdd an item before checking out.");
+            dialog("info", "Your cart is empty!\nAdd an item before checking out.", "Cart Empty");
         }
     }
 
@@ -698,7 +723,7 @@ public class StoreView {
             updateProductStockLabel(product);
             updateCartTotal();
         } catch (IllegalArgumentException err) {
-            dialog("error", err.getMessage());
+            dialog("system-error", err.getMessage(), "Invalid Parameter - Adding to Cart");
         }
     }
 
@@ -708,15 +733,18 @@ public class StoreView {
             updateProductStockLabel(product);
             updateCartTotal();
         } catch (IllegalArgumentException err) {
-            dialog("error", err.getMessage());
+            dialog("system-error", err.getMessage(), "Invalid Parameter - Removing from Cart");
         }
     }
 
-    public static void dialog(String type, String message) {
+    public static void dialog(String type, String message, String title) {
         switch (type) {
-            case "error" -> JOptionPane.showMessageDialog(frame, "ERROR: " + message);
-            case "warn" -> JOptionPane.showMessageDialog(frame, "WARNING: " + message);
-            case "info" -> JOptionPane.showMessageDialog(frame, message);
+            case "system-error" -> JOptionPane.showMessageDialog(frame, "SYSTEM ERROR: " + message, " SYSTEM ERROR: " + title, JOptionPane.ERROR_MESSAGE);
+            case "user-error" -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE);
+            case "warn" -> JOptionPane.showMessageDialog(frame, "WARNING: " + message, "WARNING: " + title, JOptionPane.WARNING_MESSAGE);
+            case "question" -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.QUESTION_MESSAGE);
+            case "plain" -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.PLAIN_MESSAGE);
+            case "info" -> JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
         }
 
     }
