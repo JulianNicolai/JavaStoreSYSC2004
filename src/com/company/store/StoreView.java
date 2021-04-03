@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class to manage each user session and ShoppingCart
@@ -33,6 +34,12 @@ public class StoreView {
 
     private static final JFrame frame = new JFrame();
 
+    private final HashMap<UUID, List<JPanel>> productDirectory;
+
+    private final JPanel cartProductPanel;
+
+    private final JLabel totalLabel;
+
     private final String username;
 
     private final char[] password;
@@ -47,12 +54,18 @@ public class StoreView {
         store.addUser(this);
         this.cart = new ShoppingCart();
 
+        this.cartProductPanel = new JPanel();
+        cartProductPanel.setLayout(new BoxLayout(cartProductPanel, BoxLayout.Y_AXIS));
+        cartProductPanel.setBackground(Color.LIGHT_GRAY);
+        this.totalLabel = new JLabel("Total: $0.00");
+        this.productDirectory = new HashMap<>();
+
         this.username = username;
         this.password = new char[password.length()];
         for (int i = 0; i < password.length(); i++) this.password[i] = password.charAt(i);
     }
 
-    private static class UserSettings {
+    private static class ClientSettings {
 
         public final static String COMPANY = "LARGE RETAIL CORPORATION";
         public final static int HEIGHT = 648;
@@ -91,8 +104,6 @@ public class StoreView {
      */
     public static void main(String[] args) {
 
-        frameInit();
-
         StoreManager storeManager = new StoreManager();
         StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
         StoreView user2 = new StoreView(storeManager, "Julian", "pass");
@@ -103,9 +114,11 @@ public class StoreView {
         users.add(user2);
         users.add(user3);
 
-        user1.displayGUI();
+        frameInit();
 
-//        displayLogin(users);
+//        user1.displayGUI();
+
+        displayLogin(users);
 
     }
 
@@ -114,8 +127,8 @@ public class StoreView {
         ImageIcon img = new ImageIcon("images/icon.png");
         frame.setIconImage(img.getImage());
 
-        frame.setTitle(UserSettings.COMPANY + " Store");
-        frame.setMinimumSize(new Dimension(UserSettings.WIDTH, UserSettings.HEIGHT));
+        frame.setTitle(ClientSettings.COMPANY + " Store");
+        frame.setMinimumSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -138,32 +151,32 @@ public class StoreView {
 
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        loginPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
+        loginPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
 
         JPanel borderPanel = new JPanel(new GridBagLayout());
-        borderPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
+        borderPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
 
         JPanel hintPanel = new JPanel();
         JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and RandomUser all with password: pass");
         hintLabel.setForeground(Color.lightGray);
         hintPanel.add(hintLabel);
-        hintPanel.setBackground(UserSettings.ColorPalette.DARKEST_BLUE);
+        hintPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
 
         JButton loginButton = new JButton("Login");
-        loginButton.setFont(UserSettings.FontList.FONT_30);
+        loginButton.setFont(ClientSettings.FontList.FONT_30);
 
-        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + UserSettings.COMPANY + "!<br><br><i style='font-size: 16px'>We sell you things, <u>for money</u>!</i></center></html>", SwingConstants.CENTER);
-        welcomeLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
-        welcomeLabel.setFont(UserSettings.FontList.FONT_30);
+        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + ClientSettings.COMPANY + "!<br><br><i style='font-size: 16px'>We sell you things, <u>for money</u>!</i></center></html>", SwingConstants.CENTER);
+        welcomeLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
+        welcomeLabel.setFont(ClientSettings.FontList.FONT_30);
 
         JLabel loginLabel = new JLabel("LOGIN:");
-        loginLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
-        loginLabel.setFont(UserSettings.FontList.FONT_30);
+        loginLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
+        loginLabel.setFont(ClientSettings.FontList.FONT_30);
 
         JTextField username = new JTextField(80);
         username.setText("Username");
         username.setForeground(Color.GRAY);
-        username.setFont(UserSettings.FontList.FONT_16);
+        username.setFont(ClientSettings.FontList.FONT_16);
         username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -188,7 +201,7 @@ public class StoreView {
         JPasswordField password = new JPasswordField(80);
         password.setText("--------");
         password.setForeground(Color.GRAY);
-        password.setFont(UserSettings.FontList.FONT_16);
+        password.setFont(ClientSettings.FontList.FONT_16);
         password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -298,23 +311,20 @@ public class StoreView {
 
     public void displayGUI() {
 
-        List<List<Object>> inventoryArray = store.getInventoryInfo();
-        List<List<Object>> cartArray = cart.getCartInfo();
-
         frame.getContentPane().removeAll();
         frame.repaint();
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(UserSettings.ColorPalette.DARK_BLUE);
+        headerPanel.setBackground(ClientSettings.ColorPalette.DARK_BLUE);
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
-
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        buttonPanel.setBackground(UserSettings.ColorPalette.DARK_BLUE);
 
         JPanel productsPanel = new JPanel();
         productsPanel.setLayout(new BoxLayout(productsPanel, BoxLayout.Y_AXIS));
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        buttonPanel.setBackground(ClientSettings.ColorPalette.DARK_BLUE);
 
         ImageIcon cartImg = new ImageIcon("images/cart.png");
         ImageIcon logoutImg = new ImageIcon("images/logout.png");
@@ -335,64 +345,65 @@ public class StoreView {
         buttonPanel.add(logoutButton);
         buttonPanel.add(cartButton);
 
-        JLabel storeLabel = new JLabel(UserSettings.COMPANY + " Store");
-        storeLabel.setFont(UserSettings.FontList.FONT_30);
-        storeLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
+        JLabel storeLabel = new JLabel(ClientSettings.COMPANY + " Store");
+        storeLabel.setFont(ClientSettings.FontList.FONT_30);
+        storeLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
 
         headerPanel.add(storeLabel, BorderLayout.LINE_START);
         headerPanel.add(buttonPanel, BorderLayout.LINE_END);
 
         JPanel cartPanel = new JPanel(new BorderLayout());
-        cartPanel.setPreferredSize(new Dimension(300, 300));
-        cartPanel.setBackground(UserSettings.ColorPalette.MED_BLUE);
+        cartPanel.setPreferredSize(new Dimension(320, 300));
+        cartPanel.setBackground(ClientSettings.ColorPalette.MED_BLUE);
 
-        JLabel cartHeadLabel = new JLabel("Current Cart: ");
-        cartHeadLabel.setFont(UserSettings.FontList.FONT_22);
-        cartHeadLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
+        JLabel cartHeadLabel = new JLabel("My Cart: ");
+        cartHeadLabel.setFont(ClientSettings.FontList.FONT_22);
+        cartHeadLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
         cartHeadLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
-        JPanel cartProductPanel = new JPanel();
-        cartProductPanel.setLayout(new BoxLayout(cartProductPanel, BoxLayout.Y_AXIS));
-        cartProductPanel.setBackground(Color.LIGHT_GRAY);
+        JPanel cartCheckoutPanel = new JPanel(new BorderLayout());
+        cartCheckoutPanel.setBackground(ClientSettings.ColorPalette.MED_BLUE);
 
-        JLabel cartTotalLabel = new JLabel("Total: ");
-        cartTotalLabel.setFont(UserSettings.FontList.FONT_22);
-        cartTotalLabel.setForeground(UserSettings.ColorPalette.LIGHTEST_BLUE);
-        cartTotalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        totalLabel.setFont(ClientSettings.FontList.FONT_22);
+        totalLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
+        totalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JButton cartCheckoutButton = new JButton("Checkout");
+        cartCheckoutButton.setFont(ClientSettings.FontList.FONT_22);
+        cartCheckoutButton.setMargin(new Insets(0, 10, 0, 10));
 
         JScrollPane scrollCartPane = new JScrollPane(cartProductPanel);
         scrollCartPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollCartPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollCartPane.getVerticalScrollBar().setUnitIncrement(20);
 
+        cartCheckoutPanel.add(totalLabel, BorderLayout.PAGE_START);
+        cartCheckoutPanel.add(cartCheckoutButton, BorderLayout.CENTER);
+
         cartPanel.add(cartHeadLabel, BorderLayout.PAGE_START);
         cartPanel.add(scrollCartPane, BorderLayout.CENTER);
-        cartPanel.add(cartTotalLabel, BorderLayout.PAGE_END);
+        cartPanel.add(cartCheckoutPanel, BorderLayout.PAGE_END);
 
         cartButton.addActionListener(e -> {
             AbstractButton button = (AbstractButton) e.getSource();
             cartPanel.setVisible(button.getModel().isSelected());
         });
 
-        for (List<Object> item : cartArray) {
-            int units = (int) item.get(0);
-            Product product = (Product) item.get(1);
-            cartProductPanel.add(createCartProductPanel(product, units));
-        }
+        cartCheckoutButton.addActionListener(e -> checkout());
 
-        Product prod = new Product(UUID.randomUUID(), "55 Gallon Industrial Drum of Mountain Dew (included straw)", 15.99, "images/product_images/milk.jpg", "Milk is an emulsion or colloid of butterfat globules within a water-based fluid that contains dissolved carbohydrates and protein aggregates with minerals.");
-        int units = 10;
-
-        cartProductPanel.add(createCartProductPanel(prod, units));
-        cartProductPanel.add(createCartProductPanel(prod, units));
-        cartProductPanel.add(createCartProductPanel(prod, units));
-        cartProductPanel.add(createCartProductPanel(prod, units));
-        cartProductPanel.add(createCartProductPanel(prod, units));
+        List<List<Object>> inventoryArray = store.getInventoryInfo();
+        List<List<Object>> cartArray = cart.getCartInfo();
 
         for (List<Object> item : inventoryArray) {
             int stock = (int) item.get(0);
             Product product = (Product) item.get(1);
             productsPanel.add(createProductPanel(product, stock));
+        }
+
+        for (List<Object> item : cartArray) {
+            int units = (int) item.get(0);
+            Product product = (Product) item.get(1);
+            cartProductPanel.add(createCartProductPanel(product, units));
         }
 
         JScrollPane scrollProductPane = new JScrollPane(productsPanel);
@@ -408,7 +419,7 @@ public class StoreView {
 
         frame.add(mainPanel);
         frame.pack();
-        frame.setSize(new Dimension(UserSettings.WIDTH, UserSettings.HEIGHT));
+        frame.setSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
         // FIXME: make dimensions stay the same on logout
         // FIXME: make minimum size function correctly if possible
         frame.setVisible(true);
@@ -431,6 +442,9 @@ public class StoreView {
         productPanel.setBorder(new CompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 2),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        List<JPanel> panelList = new ArrayList<>();
+        panelList.add(productPanel);
+        productDirectory.put(product.getID(), panelList);
 
         ImageIcon img = new ImageIcon(product.getImage());
         ImageIcon productImageIcon = new ImageIcon(img.getImage().getScaledInstance(180, 180, Image.SCALE_DEFAULT));
@@ -442,10 +456,10 @@ public class StoreView {
         productDetailsPanel.setBackground(Color.WHITE);
 
         JLabel productTitle = new JLabel(product.getName());
-        productTitle.setFont(UserSettings.FontList.FONT_22);
+        productTitle.setFont(ClientSettings.FontList.FONT_22);
 
         JLabel productDescription = new JLabel("<html><body width='100%'>" + product.getDescription() +  "</body></html>");
-        productDescription.setFont(UserSettings.FontList.FONT_16);
+        productDescription.setFont(ClientSettings.FontList.FONT_16);
 
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.add(productDescription, BorderLayout.PAGE_START);
@@ -461,32 +475,51 @@ public class StoreView {
         itemInfoPanel.setBackground(Color.WHITE);
 
         JButton addToCart = new JButton("Add to Cart");
-        addToCart.setFont(UserSettings.FontList.FONT_16);
+        addToCart.setFont(ClientSettings.FontList.FONT_16);
         addToCart.setPreferredSize(new Dimension(130, 32));
 
         JLabel stockLabel = new JLabel(Integer.toString(stock));
-        stockLabel.setFont(UserSettings.FontList.FONT_16);
+        stockLabel.setFont(ClientSettings.FontList.FONT_16);
         setLabelWidth(stockLabel);
         stockLabel.setBorder(BorderFactory.createTitledBorder("Stock"));
 
-        String priceString = new DecimalFormat("#,###.00").format(product.getPrice());
+        String priceString = new DecimalFormat("#,##0.00").format(product.getPrice());
 
         JLabel priceLabel = new JLabel("$" + priceString);
-        priceLabel.setFont(UserSettings.FontList.FONT_16);
+        priceLabel.setFont(ClientSettings.FontList.FONT_16);
         setLabelWidth(priceLabel);
         priceLabel.setBorder(BorderFactory.createTitledBorder("Price"));
 
         SpinnerModel unitModel = new SpinnerNumberModel(0, 0, stock, 1);
 
         JSpinner unitSpinner = new JSpinner(unitModel);
-        unitSpinner.setFont(UserSettings.FontList.FONT_22);
+        unitSpinner.setFont(ClientSettings.FontList.FONT_22);
         unitSpinner.setPreferredSize(new Dimension(80, 32));
 
         addToCart.addActionListener(e -> {
+
             int units = (int) unitSpinner.getValue();
+            boolean exist = true;
+
+            try {
+                cart.getUnits(product.getID());
+            } catch (IllegalArgumentException err) {
+                exist = false;
+            }
+
             if (units > 0) {
-                dialog("info", "Added " + units + " of product to cart.");
-                unitSpinner.setValue(0);
+                addToCart(product, units);
+                if (!exist) {
+                    JPanel panel = createCartProductPanel(product, units);
+                    List<JPanel> panels = productDirectory.get(product.getID());
+                    panels.add(panel);
+                    cartProductPanel.add(panel);
+                } else {
+                    updateCartUnitsLabel(product, cart.getUnits(product.getID()));
+                }
+
+                int newStock = store.getStock(product.getID());
+                unitSpinner.setModel(new SpinnerNumberModel(0, 0, newStock, 1));
             }
         });
 
@@ -525,61 +558,152 @@ public class StoreView {
         JLabel productImage = new JLabel(productImageIcon);
 
         JLabel productTitle = new JLabel("<html><body width='100%'>" + product.getName() + "</body></html>");
-        productTitle.setFont(UserSettings.FontList.FONT_16);
-        productTitle.setPreferredSize(new Dimension(180, 62));
+        productTitle.setFont(ClientSettings.FontList.FONT_16);
+        productTitle.setPreferredSize(new Dimension(180 + 20, 62));
+        productTitle.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
         JPanel productDetailsPanel = new JPanel(new BorderLayout());
         productDetailsPanel.setBackground(Color.WHITE);
 
-        JButton removeFromCart = new JButton("Remove Item");
-        removeFromCart.setFont(UserSettings.FontList.FONT_12);
-        removeFromCart.setPreferredSize(new Dimension(90, 20));
+        JButton removeFromCart = new JButton("Remove");
+        removeFromCart.setFont(ClientSettings.FontList.FONT_12);
+        removeFromCart.setPreferredSize(new Dimension(60, 20));
         removeFromCart.setMargin(new Insets(1, 1, 1, 1));
 
-        int stock = 15; // FIXME: get real stock
-        SpinnerModel unitModel = new SpinnerNumberModel(units, 0, stock, 1);
+        int stock = store.getStock(product.getID());
+        SpinnerModel unitModel = new SpinnerNumberModel(units, 0, units + stock, 1);
 
         JSpinner unitSpinner = new JSpinner(unitModel);
-        unitSpinner.setFont(UserSettings.FontList.FONT_12);
-        unitSpinner.setPreferredSize(new Dimension(60, 20));
+        unitSpinner.setFont(ClientSettings.FontList.FONT_12);
+        unitSpinner.setPreferredSize(new Dimension(50, 20));
+
+        String priceString = new DecimalFormat(" $#,##0.00").format(product.getPrice());
+
+        JLabel productPrice = new JLabel(priceString);
+        productPrice.setFont(ClientSettings.FontList.FONT_12);
+        productPrice.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 1, true));
+        productPrice.setPreferredSize(new Dimension(70, 20));
+
+        AtomicInteger oldSpinnerVal = new AtomicInteger(units);
 
         unitSpinner.addChangeListener(e -> {
-            if ((int) unitSpinner.getValue() == 0) {
-                // FIXME: remove from cart
-                String updateMessage = "Are you sure you want to remove this product from cart.";
-                if (JOptionPane.showConfirmDialog(frame, updateMessage) == JOptionPane.OK_OPTION) {
-                    // FIXME: remove from cart
-                    dialog("info", "PLACEHOLDER: Removed from cart.");
-                } else {
-                    unitSpinner.setValue(1);
-                }
 
+            int newSpinnerVal = (int) unitSpinner.getValue();
+            boolean increase = oldSpinnerVal.get() < newSpinnerVal;
+
+            if (newSpinnerVal == 0) {
+                removeFromCart(product, cart.getUnits(product.getID()));
+                List<JPanel> panels = productDirectory.get(product.getID());
+                cartProductPanel.remove(panels.get(1));
+                cartProductPanel.repaint();
+                panels.remove(1);
+            } else if (increase) {
+                addToCart(product, newSpinnerVal - oldSpinnerVal.get());
             } else {
-                // FIXME: add to cart, remove from stock
-//                    dialog("info", "PLACEHOLDER: Added to cart.");
+                removeFromCart(product, oldSpinnerVal.get() - newSpinnerVal);
             }
+
+            updateProductStockLabel(product);
+            updateCartTotal();
+
+            oldSpinnerVal.set(newSpinnerVal);
         });
 
         removeFromCart.addActionListener(e -> {
-            // FIXME: remove from cart
-            dialog("info", "PLACEHOLDER: Removed from cart.");
+            removeFromCart(product, cart.getUnits(product.getID()));
+            List<JPanel> panels = productDirectory.get(product.getID());
+            cartProductPanel.remove(panels.get(1));
+            cartProductPanel.repaint();
+            panels.remove(1);
         });
 
         JPanel selectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         selectPanel.setBackground(Color.WHITE);
 
-        selectPanel.add(unitSpinner);
         selectPanel.add(removeFromCart);
+        selectPanel.add(unitSpinner);
+        selectPanel.add(productPrice);
 
         productDetailsPanel.add(productTitle, BorderLayout.PAGE_START);
-        productDetailsPanel.add(selectPanel, BorderLayout.LINE_START);
+        productDetailsPanel.add(selectPanel, BorderLayout.PAGE_END);
 
         productPanel.add(productDetailsPanel, BorderLayout.LINE_END);
         productPanel.add(productImage, BorderLayout.LINE_START);
 
         return productPanel;
+    }
 
-        // TODO: finish cart panel
+    private void updateProductStockLabel(Product product) {
+        JPanel productPanel = productDirectory.get(product.getID()).get(0);
+        Component[] c1 = productPanel.getComponents();
+        Component[] c2 = ((JPanel) c1[1]).getComponents();
+        Component[] c3 = ((JPanel) c2[2]).getComponents();
+        Component[] c40 = ((JPanel) c3[0]).getComponents();
+        Component[] c41 = ((JPanel) c3[1]).getComponents();
+        JLabel label = (JLabel) c40[1];
+        JSpinner spinner = (JSpinner) c41[0];
+        int stock = store.getStock(product.getID());
+        label.setText(Integer.toString(stock));
+        spinner.setModel(new SpinnerNumberModel(0, 0, stock, 1));
+    }
+
+    private void updateCartUnitsLabel(Product product, int units) {
+        JPanel productPanel = productDirectory.get(product.getID()).get(1);
+        Component[] c1 = productPanel.getComponents();
+        Component[] c2 = ((JPanel) c1[0]).getComponents();
+        Component[] c3 = ((JPanel) c2[1]).getComponents();
+        JSpinner spinner = (JSpinner) c3[1];
+        int stock = store.getStock(product.getID());
+        spinner.setModel(new SpinnerNumberModel(units, 0, units + stock, 1));
+    }
+
+    private void updateCartTotal() {
+        double newTotal = calculateCartTotal();
+        String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
+        totalLabel.setText(priceString);
+    }
+
+    private void checkout() {
+        double newTotal = calculateCartTotal();
+        String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
+        dialog("info", priceString);
+        cart.clear();
+        cartProductPanel.removeAll();
+        cartProductPanel.repaint();
+        updateCartTotal();
+    }
+
+    private double calculateCartTotal() {
+
+        List<List<Object>> cartList = cart.getCartInfo();
+
+        double total = 0.0;
+        for (List<Object> item : cartList) {
+            Product product = (Product) item.get(1);
+            int units = (int) item.get(0);
+            total += product.getPrice() * units;
+        }
+        return total;
+    }
+
+    private void addToCart(Product product, int units) {
+        try {
+            cart.addToCart(store, product, units);
+            updateProductStockLabel(product);
+            updateCartTotal();
+        } catch (IllegalArgumentException err) {
+            dialog("error", err.getMessage());
+        }
+    }
+
+    private void removeFromCart(Product product, int units) {
+        try {
+            cart.removeFromCart(store, product, units);
+            updateProductStockLabel(product);
+            updateCartTotal();
+        } catch (IllegalArgumentException err) {
+            dialog("error", err.getMessage());
+        }
     }
 
     public static void dialog(String type, String message) {
