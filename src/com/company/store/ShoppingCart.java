@@ -23,7 +23,7 @@ public class ShoppingCart {
     /**
      * CartEntry static nested class is used to associate a product with the number of units in a users cart
      */
-    public static class CartEntry {
+    private static class CartEntry {
 
         private final Product product;
         private int units;
@@ -85,6 +85,7 @@ public class ShoppingCart {
         store.removeStock(product.getID(), numUnits);
         if (cartEntry.getProduct().getName() == null) cartList.add(new CartEntry(product, numUnits));
         else cartEntry.setUnits(cartEntry.getUnits() + numUnits);
+
     }
 
     /**
@@ -107,6 +108,21 @@ public class ShoppingCart {
             else cartEntry.setUnits(cartEntry.getUnits() - numUnits);
         }
 
+    }
+
+    /**
+     * Method for retrieving the current units of a Product
+     * @param id ID of desired Product
+     * @return number of units in cart
+     */
+    public int getUnits(UUID id) {
+
+        CartEntry cartEntry = getCartEntryByID(id);
+
+        if (cartEntry.getProduct().getName() == null)
+            throw new IllegalArgumentException("The product requested does not exist.");
+
+        return cartEntry.getUnits();
     }
 
     /**
