@@ -90,6 +90,13 @@ public class StoreManager {
     }
 
     /**
+     * Method to retrieve stock using a specific product ID
+     * @param id UUID of product
+     * @return integer of stock available
+     */
+    public int getStock(UUID id) { return inventory.getStock(id); }
+
+    /**
      * Proxy method to retrieve information about the products contained in Inventory
      * @return 2D list of objects containing the product and its stock
      */
