@@ -28,6 +28,10 @@ public class StoreManager {
         this.users = new ArrayList<>();
     }
 
+    /**
+     * Method to retrieve current users in StoreManager
+     * @return List of users
+     */
     public List<StoreView> getUsers() { return this.users; }
 
     /**
@@ -102,6 +106,10 @@ public class StoreManager {
      */
     public List<List<Object>> getInventoryInfo() { return inventory.getInventoryInfo(); }
 
+    /**
+     * Method to add a new user to the StoreManager
+     * @param storeView StoreView user
+     */
     public void addUser(StoreView storeView) {
 
         boolean foundFlag = false;

@@ -25,8 +25,14 @@ public class Product {
      */
     private final double price;
 
+    /**
+     * Image icon location, relative to root (project) folder
+     */
     private final String image;
 
+    /**
+     * Text description of product
+     */
     private final String description;
 
     /**
@@ -54,7 +60,7 @@ public class Product {
      */
     public String getName() { return this.name; }
 
-        /**
+    /**
      * Get method to retrieve the ID of a product
      * @return Integer ID of the product
      */

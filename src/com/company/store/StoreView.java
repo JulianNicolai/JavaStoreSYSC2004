@@ -31,23 +31,42 @@ public class StoreView {
      */
     private final ShoppingCart cart;
 
-
-    // TODO: Add JavaDoc
+    /**
+     * JFrame of the current window
+     */
     private static final JFrame frame = new JFrame();
 
+    /**
+     * HashMap with product ID's as keys and an aggregation of JPanels
+     * index 0 is always the main product panel, index 1 is always the cart panel (if it exists)
+     */
     private final HashMap<UUID, List<JPanel>> productDirectory;
 
+    /**
+     * The users cart panel which consists of cart entry JPanels
+     */
     private final JPanel cartProductPanel;
 
+    /**
+     * Cart label that displays the cart's current total
+     */
     private final JLabel totalLabel;
 
+    /**
+     * Username of the user (for login only, not case sensitive)
+     */
     private final String username;
 
+    /**
+     * Password of the user (for login only)
+     */
     private final char[] password;
 
     /**
      * Constructor that generates a unique cartID and initializes a new ShoppingCart object
      * @param store StoreManager to be associated with the user
+     * @param username String username of new StoreView user
+     * @param password String password of new StoreView user
      */
     public StoreView(StoreManager store, String username, String password) {
         this.store = store;
@@ -61,11 +80,21 @@ public class StoreView {
         this.totalLabel = new JLabel("Total: $0.00");
         this.productDirectory = new HashMap<>();
 
-        this.username = username;
-        this.password = new char[password.length()];
-        for (int i = 0; i < password.length(); i++) this.password[i] = password.charAt(i);
+        if (username.toLowerCase(Locale.ROOT).equals("username")) {
+            throw new IllegalArgumentException("Illegal username: cannot be 'username'");
+        } else if (password.equals("--------")) {
+            throw new IllegalArgumentException("Illegal password: cannot be '--------'");
+        } else {
+            this.username = username;
+            this.password = new char[password.length()];
+            for (int i = 0; i < password.length(); i++) this.password[i] = password.charAt(i);
+        }
     }
 
+    /**
+     * Static nested class used to modify system parameters before compilation,
+     * such as minimum height/width, color palette, font sizes, and company name
+     */
     private static class ClientSettings {
 
         public final static String COMPANY = "LARGE RETAIL CORPORATION";
@@ -95,9 +124,17 @@ public class StoreView {
      */
     public UUID getCartID() { return cartID; }
 
+    /**
+     * Method used for testing to retrieve user cart
+     * @return ShoppingCart of user
+     */
     public ShoppingCart getCart() { return cart; }
 
-    public String getUsername() { return username; }
+    /**
+     * Retrieves username of StoreView
+     * @return String username
+     */
+    private String getUsername() { return username; }
 
     /**
      * Main entry point to initialize and run program
@@ -106,29 +143,38 @@ public class StoreView {
     public static void main(String[] args) {
 
         StoreManager storeManager = new StoreManager();
-        StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
-        StoreView user2 = new StoreView(storeManager, "Julian", "pass");
-        StoreView user3 = new StoreView(storeManager, "RandomUser", "pass");
 
         List<StoreView> users = new ArrayList<>();
-        users.add(user1);
-        users.add(user2);
-        users.add(user3);
+
+        try {
+            StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
+            StoreView user2 = new StoreView(storeManager, "Julian", "pass");
+            StoreView user3 = new StoreView(storeManager, "RandomUser", "pass");
+
+            users.add(user1);
+            users.add(user2);
+            users.add(user3);
+
+        } catch (IllegalArgumentException e) {
+            dialog("system-error", e.getMessage(), "Illegal Parameter - User Creation");
+        }
 
         frameInit();
 
-        user1.displayGUI();
+//        users.get(0).displayGUI(); // display the first user immediately
 
-//        displayLogin(users);
+        displayLogin(users);
 
     }
 
+    /**
+     * Static method to initialize the window frame
+     */
     private static void frameInit() {
 
         ImageIcon img = new ImageIcon("images/icon.png");
         frame.setIconImage(img.getImage());
 
-        frame.setTitle(ClientSettings.COMPANY + " Store");
         frame.setMinimumSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -146,10 +192,16 @@ public class StoreView {
         });
     }
 
+    /**
+     * Static method to display the login screen to select user
+     * @param users list of users in the store
+     */
     private static void displayLogin(List<StoreView> users) {
 
         frame.getContentPane().removeAll();
         frame.repaint();
+
+        frame.setTitle(ClientSettings.COMPANY + " Login");
 
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -175,8 +227,11 @@ public class StoreView {
         loginLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
         loginLabel.setFont(ClientSettings.FontList.FONT_30);
 
+        String placeholderUsername = "Username";
+        String placeholderPassword = "--------";
+
         JTextField username = new JTextField(80);
-        username.setText("Username");
+        username.setText(placeholderUsername);
         username.setForeground(Color.GRAY);
         username.setFont(ClientSettings.FontList.FONT_16);
         username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
@@ -185,7 +240,7 @@ public class StoreView {
         username.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (username.getText().equals("Username")) {
+                if (username.getText().equals(placeholderUsername)) {
                     username.setText("");
                     username.setForeground(Color.BLACK);
                 }
@@ -195,13 +250,13 @@ public class StoreView {
             public void focusLost(FocusEvent e) {
                 if (username.getText().isEmpty()) {
                     username.setForeground(Color.GRAY);
-                    username.setText("Username");
+                    username.setText(placeholderUsername);
                 }
             }
         });
 
         JPasswordField password = new JPasswordField(80);
-        password.setText("--------");
+        password.setText(placeholderPassword);
         password.setForeground(Color.GRAY);
         password.setFont(ClientSettings.FontList.FONT_16);
         password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
@@ -210,7 +265,7 @@ public class StoreView {
         password.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (Arrays.equals(password.getPassword(), "--------".toCharArray())) {
+                if (Arrays.equals(password.getPassword(), placeholderPassword.toCharArray())) {
                     password.setText("");
                     password.setForeground(Color.BLACK);
                 }
@@ -220,7 +275,7 @@ public class StoreView {
             public void focusLost(FocusEvent e) {
                 if (Arrays.equals(password.getPassword(), "".toCharArray())) {
                     password.setForeground(Color.GRAY);
-                    password.setText("--------");
+                    password.setText(placeholderPassword);
                 }
             }
         });
@@ -238,18 +293,18 @@ public class StoreView {
                 }
             }
 
-            password.setText("--------");
+            password.setText(placeholderPassword);
             password.setForeground(Color.GRAY);
 
             if (loggedInUser != null) {
                 dialog("info", "Welcome back " + loggedInUser.getUsername() + "!", "Login Successful");
-                username.setText("Username");
+                username.setText(placeholderUsername);
                 username.setForeground(Color.GRAY);
 
                 loggedInUser.displayGUI();
 
             } else {
-                if (givenUser.equals("Username") || Arrays.equals(givenPass, "--------".toCharArray())) {
+                if (givenUser.equals(placeholderUsername) || Arrays.equals(givenPass, placeholderPassword.toCharArray())) {
                     dialog("user-error", "Username/password fields cannot be empty.", "Empty Field");
                 } else {
                     dialog("user-error", "Incorrect username/password.", "Invalid Username/Password");
@@ -292,10 +347,20 @@ public class StoreView {
         frame.toFront();
     }
 
+    /**
+     * Method to verify the username parameter is equal to StoreView username
+     * @param givenUsername String username to test
+     * @return boolean match
+     */
     private boolean verifyUsername(String givenUsername) {
         return givenUsername.toLowerCase(Locale.ROOT).equals(username.toLowerCase(Locale.ROOT));
     }
 
+    /**
+     * Method to verify the password parameter is equal to StoreView password
+     * @param givenPassword character array password to test
+     * @return boolean match
+     */
     private boolean verifyPassword(char[] givenPassword) {
         return Arrays.equals(givenPassword, password);
     }
@@ -311,10 +376,15 @@ public class StoreView {
      */
     public List<List<Object>> getCartInfo() { return cart.getCartInfo(); }
 
+    /**
+     * Method to start the interface of a user
+     */
     public void displayGUI() {
 
         frame.getContentPane().removeAll();
         frame.repaint();
+
+        frame.setTitle(ClientSettings.COMPANY + " Store");
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -427,13 +497,12 @@ public class StoreView {
 
     }
 
-    private void setLabelWidth(JLabel label) {
-        // strangely, the calculated preferred width is does not scale linearly
-        // a square root and weight is used to compensate for this drift
-        int preferredStockWidth = (int) (Math.pow(label.getPreferredSize().width, 0.89) * 2);
-        label.setPreferredSize(new Dimension(Math.max(preferredStockWidth, 65), 38));
-    }
-
+    /**
+     * Method to generate a product panel from a Product object and available stock
+     * @param product Product object to set labels to
+     * @param stock Stock available
+     * @return Completed JPanel
+     */
     private JPanel createProductPanel(Product product, int stock) {
 
         JPanel productPanel = new JPanel(new BorderLayout());
@@ -516,7 +585,7 @@ public class StoreView {
                     panels.add(panel);
                     cartProductPanel.add(panel);
                 } else {
-                    updateCartUnitsLabel(product, cart.getUnits(product.getID()));
+                    updateCartUnitsLabel(product);
                 }
 
                 int newStock = store.getStock(product.getID());
@@ -543,6 +612,12 @@ public class StoreView {
         return productPanel;
     }
 
+    /**
+     * Method to generate a cart entry panel from a Product and added units
+     * @param product Product object to set labels to
+     * @param units Units in cart
+     * @return Completed JPanel
+     */
     private JPanel createCartProductPanel(Product product, int units) {
 
         JPanel productPanel = new JPanel(new BorderLayout());
@@ -633,6 +708,21 @@ public class StoreView {
         return productPanel;
     }
 
+    /**
+     * Method to set the label width of titled labels
+     * @param label JLabel to set width
+     */
+    private void setLabelWidth(JLabel label) {
+        // strangely, the calculated preferred width is does not scale linearly
+        // a square root and weight is used to compensate for this drift
+        int preferredStockWidth = (int) (Math.pow(label.getPreferredSize().width, 0.89) * 2);
+        label.setPreferredSize(new Dimension(Math.max(preferredStockWidth, 65), 38));
+    }
+
+    /**
+     * Method to refresh the current stock label of a product
+     * @param product Product that requires updating
+     */
     private void updateProductStockLabel(Product product) {
         JPanel productPanel = productDirectory.get(product.getID()).get(0);
         Component[] c1 = productPanel.getComponents();
@@ -647,26 +737,40 @@ public class StoreView {
         spinner.setModel(new SpinnerNumberModel(0, 0, stock, 1));
     }
 
-    private void updateCartUnitsLabel(Product product, int units) {
-        JPanel productPanel = productDirectory.get(product.getID()).get(1);
+    /**
+     * Method to refresh the units in a cart entry of a product
+     * @param product Product that requires updating
+     */
+    private void updateCartUnitsLabel(Product product) {
+        UUID id = product.getID();
+        JPanel productPanel = productDirectory.get(id).get(1);
         Component[] c1 = productPanel.getComponents();
         Component[] c2 = ((JPanel) c1[0]).getComponents();
         Component[] c3 = ((JPanel) c2[1]).getComponents();
         JSpinner spinner = (JSpinner) c3[1];
-        int stock = store.getStock(product.getID());
+        int stock = store.getStock(id);
+        int units = cart.getUnits(id);
         spinner.setModel(new SpinnerNumberModel(units, 0, units + stock, 1));
     }
 
+    /**
+     * Method to refresh the cart total label
+     */
     private void updateCartTotal() {
         double newTotal = calculateCartTotal();
         String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
         totalLabel.setText(priceString);
     }
 
+    /**
+     * Method to checkout the user and display a receipt once completed
+     */
     private void checkout() {
         double newTotal = calculateCartTotal();
         if (newTotal > 0) {
+
             DecimalFormat priceFormat = new DecimalFormat("$#,##0.00");
+
             String confirmMessage = "<html>Are you sure you want to checkout?<br>Total: " + priceFormat.format(newTotal) + "</html>";
             int result = JOptionPane.showConfirmDialog(frame, confirmMessage, "Confirm Checkout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
@@ -693,7 +797,7 @@ public class StoreView {
 
                 dialog("plain", formattedString.toString(), "Transaction Receipt");
 
-                cart.clear();
+                store.transaction(this);
                 cartProductPanel.removeAll();
                 cartProductPanel.repaint();
                 updateCartTotal();
@@ -704,6 +808,10 @@ public class StoreView {
         }
     }
 
+    /**
+     * Method to calculate the current cart total
+     * @return double total
+     */
     private double calculateCartTotal() {
 
         List<List<Object>> cartList = cart.getCartInfo();
@@ -717,6 +825,11 @@ public class StoreView {
         return total;
     }
 
+    /**
+     * Method to add a product to the users cart
+     * @param product Product object to add
+     * @param units units to add
+     */
     private void addToCart(Product product, int units) {
         try {
             cart.addToCart(store, product, units);
@@ -727,6 +840,11 @@ public class StoreView {
         }
     }
 
+    /**
+     * Method to remove a product from the users cart
+     * @param product Product object to remove
+     * @param units units to remove
+     */
     private void removeFromCart(Product product, int units) {
         try {
             cart.removeFromCart(store, product, units);
@@ -737,6 +855,12 @@ public class StoreView {
         }
     }
 
+    /**
+     * Method to display a message dialog (with OK button)
+     * @param type String type of message display: system-error, user-error, warn, question, plain, info
+     * @param message String message to display
+     * @param title String title of dialog
+     */
     public static void dialog(String type, String message, String title) {
         switch (type) {
             case "system-error" -> JOptionPane.showMessageDialog(frame, "SYSTEM ERROR: " + message, " SYSTEM ERROR: " + title, JOptionPane.ERROR_MESSAGE);
