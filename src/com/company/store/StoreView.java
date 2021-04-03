@@ -32,6 +32,8 @@ public class StoreView {
      */
     private final ShoppingCart cart;
 
+
+    // TODO: Add JavaDoc
     private static final JFrame frame = new JFrame();
 
     private final HashMap<UUID, List<JPanel>> productDirectory;
@@ -584,12 +586,12 @@ public class StoreView {
         productPrice.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 1, true));
         productPrice.setPreferredSize(new Dimension(70, 20));
 
-        AtomicInteger oldSpinnerVal = new AtomicInteger(units);
-
         unitSpinner.addChangeListener(e -> {
 
+            int currentUnits = cart.getUnits(product.getID());
+
             int newSpinnerVal = (int) unitSpinner.getValue();
-            boolean increase = oldSpinnerVal.get() < newSpinnerVal;
+            boolean increase = currentUnits < newSpinnerVal;
 
             if (newSpinnerVal == 0) {
                 removeFromCart(product, cart.getUnits(product.getID()));
@@ -598,15 +600,14 @@ public class StoreView {
                 cartProductPanel.repaint();
                 panels.remove(1);
             } else if (increase) {
-                addToCart(product, newSpinnerVal - oldSpinnerVal.get());
+                addToCart(product, newSpinnerVal - currentUnits);
             } else {
-                removeFromCart(product, oldSpinnerVal.get() - newSpinnerVal);
+                removeFromCart(product, currentUnits - newSpinnerVal);
             }
 
             updateProductStockLabel(product);
             updateCartTotal();
 
-            oldSpinnerVal.set(newSpinnerVal);
         });
 
         removeFromCart.addActionListener(e -> {
@@ -665,12 +666,17 @@ public class StoreView {
 
     private void checkout() {
         double newTotal = calculateCartTotal();
-        String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
-        dialog("info", priceString);
-        cart.clear();
-        cartProductPanel.removeAll();
-        cartProductPanel.repaint();
-        updateCartTotal();
+        if (newTotal > 0) {
+            // TODO: Update cart message
+            String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
+            dialog("info", priceString);
+            cart.clear();
+            cartProductPanel.removeAll();
+            cartProductPanel.repaint();
+            updateCartTotal();
+        } else {
+            dialog("info", "Your cart is empty!\nAdd an item before checking out.");
+        }
     }
 
     private double calculateCartTotal() {
