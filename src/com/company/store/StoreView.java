@@ -101,6 +101,9 @@ public class StoreView {
         public final static int HEIGHT = 648;
         public final static int WIDTH = 1152;
 
+        /**
+         * Designed color palette of program
+         */
         public static class ColorPalette {
             public final static Color DARKEST_BLUE = new Color(19, 41, 61);
             public final static Color DARK_BLUE = new Color(0, 100, 148);
@@ -109,6 +112,9 @@ public class StoreView {
             public final static Color LIGHTEST_BLUE = new Color(232, 241, 242);
         }
 
+        /**
+         * List of font sizes, keeps UI consistent
+         */
         public static class FontList {
             public final static Font FONT_8 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 8);
             public final static Font FONT_12 = new Font(new JLabel().getFont().getName(), Font.PLAIN, 12);
@@ -147,6 +153,9 @@ public class StoreView {
         List<StoreView> users = new ArrayList<>();
 
         try {
+
+            // create three different users, with password: pass
+
             StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
             StoreView user2 = new StoreView(storeManager, "Julian", "pass");
             StoreView user3 = new StoreView(storeManager, "RandomUser", "pass");
@@ -175,19 +184,23 @@ public class StoreView {
         ImageIcon img = new ImageIcon("src/com/company/images/icon.png");
         frame.setIconImage(img.getImage());
 
+        // sets the minimum resize of the window
         frame.setMinimumSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
-        frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null); // centers the window
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
+
+                // checks the user actually wants to exit
                 String quitMessage = "Are you sure you want to exit?";
                 int result = JOptionPane.showConfirmDialog(frame, quitMessage, "Confirm Exit", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
                     frame.setVisible(false);
                     frame.dispose();
                 }
+
             }
         });
     }
@@ -198,6 +211,7 @@ public class StoreView {
      */
     private static void displayLogin(List<StoreView> users) {
 
+        // refreshes any content already in frame if there are any
         frame.getContentPane().removeAll();
         frame.repaint();
 
@@ -210,16 +224,9 @@ public class StoreView {
         JPanel borderPanel = new JPanel(new GridBagLayout());
         borderPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
 
-        JPanel hintPanel = new JPanel();
-        JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and RandomUser all with password: pass");
-        hintLabel.setForeground(Color.lightGray);
-        hintPanel.add(hintLabel);
-        hintPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
-
-        JButton loginButton = new JButton("Login");
-        loginButton.setFont(ClientSettings.FontList.FONT_30);
-
-        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + ClientSettings.COMPANY + "!<br><br><i style='font-size: 16px'>We sell you things, <u>for money</u>!</i></center></html>", SwingConstants.CENTER);
+        JLabel welcomeLabel = new JLabel("<html><center>Welcome to " + ClientSettings.COMPANY + "!<br>" +
+                "<br><i style='font-size: 16px'>We sell you things, <u>for money</u>!</i>" +
+                "</center></html>", SwingConstants.CENTER);
         welcomeLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
         welcomeLabel.setFont(ClientSettings.FontList.FONT_30);
 
@@ -227,9 +234,21 @@ public class StoreView {
         loginLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
         loginLabel.setFont(ClientSettings.FontList.FONT_30);
 
+        JButton loginButton = new JButton("Login");
+        loginButton.setFont(ClientSettings.FontList.FONT_30);
+
+        JPanel hintPanel = new JPanel();
+        JLabel hintLabel = new JLabel("HINT: Current users are: Samuel, Julian, and " +
+                "RandomUser all with password: pass");
+        hintLabel.setForeground(Color.lightGray);
+        hintPanel.add(hintLabel);
+        hintPanel.setBackground(ClientSettings.ColorPalette.DARKEST_BLUE);
+
+        // this is the grayed out ghost text in text fields
         String placeholderUsername = "Username";
         String placeholderPassword = "--------";
 
+        // create username input text field
         JTextField username = new JTextField(80);
         username.setText(placeholderUsername);
         username.setForeground(Color.GRAY);
@@ -237,6 +256,15 @@ public class StoreView {
         username.setBorder(BorderFactory.createCompoundBorder(username.getBorder(),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
+        // create password input password field
+        JPasswordField password = new JPasswordField(80);
+        password.setText(placeholderPassword);
+        password.setForeground(Color.GRAY);
+        password.setFont(ClientSettings.FontList.FONT_16);
+        password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        // if the cursor is focused, remove the ghost text, if it is not focused, add ghost text
         username.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -255,13 +283,7 @@ public class StoreView {
             }
         });
 
-        JPasswordField password = new JPasswordField(80);
-        password.setText(placeholderPassword);
-        password.setForeground(Color.GRAY);
-        password.setFont(ClientSettings.FontList.FONT_16);
-        password.setBorder(BorderFactory.createCompoundBorder(password.getBorder(),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-
+        // if the cursor is focused, remove the ghost text, if it is not focused, add ghost text
         password.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -282,11 +304,13 @@ public class StoreView {
 
         loginButton.addActionListener(e -> {
 
+            // get the specified username and password from fields
             String givenUser = username.getText();
             char[] givenPass = password.getPassword();
 
             StoreView loggedInUser = null;
             for (StoreView user : users) {
+                // checks the username and password provided with each user
                 if (user.verifyUsername(givenUser) && user.verifyPassword(givenPass)) {
                     loggedInUser = user;
                     break;
@@ -297,22 +321,29 @@ public class StoreView {
             password.setForeground(Color.GRAY);
 
             if (loggedInUser != null) {
+
+                // if a user is found, log them in
                 dialog("info", "Welcome back " + loggedInUser.getUsername() + "!", "Login Successful");
+
                 username.setText(placeholderUsername);
                 username.setForeground(Color.GRAY);
 
                 loggedInUser.displayGUI();
 
             } else {
+
+                // if no user is found notify user
                 if (givenUser.equals(placeholderUsername) || Arrays.equals(givenPass, placeholderPassword.toCharArray())) {
                     dialog("user-error", "Username/password fields cannot be empty.", "Empty Field");
                 } else {
                     dialog("user-error", "Incorrect username/password.", "Invalid Username/Password");
                 }
+
             }
 
         });
 
+        // create new gridbaglayout constraints
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -341,10 +372,10 @@ public class StoreView {
         frame.add(hintPanel, BorderLayout.SOUTH);
 
         frame.pack();
-        loginButton.requestFocusInWindow();
-        frame.getRootPane().setDefaultButton(loginButton);
+        loginButton.requestFocusInWindow(); // set focus on login button
+        frame.getRootPane().setDefaultButton(loginButton); // sets default focus on login button
         frame.setVisible(true);
-        frame.toFront();
+        frame.toFront(); // brings the window to the front of all current windows
     }
 
     /**
@@ -381,6 +412,7 @@ public class StoreView {
      */
     public void displayGUI() {
 
+        // refreshes the display
         frame.getContentPane().removeAll();
         frame.repaint();
 
@@ -395,19 +427,26 @@ public class StoreView {
         JPanel productsPanel = new JPanel();
         productsPanel.setLayout(new BoxLayout(productsPanel, BoxLayout.Y_AXIS));
 
+        // setting main product panel into a scrollable viewport
+        JScrollPane scrollProductPane = new JScrollPane(productsPanel);
+        scrollProductPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollProductPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollProductPane.getVerticalScrollBar().setUnitIncrement(20);
+
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         buttonPanel.setBackground(ClientSettings.ColorPalette.DARK_BLUE);
 
+        // adds check cart toggle button
         ImageIcon cartImg = new ImageIcon("src/com/company/images/cart.png");
-        ImageIcon logoutImg = new ImageIcon("src/com/company/images/logout.png");
-
         JToggleButton cartButton = new JToggleButton("<html><center>View<br>My Cart</center><html>", cartImg);
         cartButton.setMargin(new Insets(1, 5, 1, 5));
 
+        // adds logout button
+        ImageIcon logoutImg = new ImageIcon("src/com/company/images/logout.png");
         JButton logoutButton = new JButton("<html><center>Logout of<br>" + username + "</center></html>", logoutImg);
         logoutButton.setMargin(new Insets(1, 5, 1, 5));
 
-        logoutButton.addActionListener(e -> {
+        logoutButton.addActionListener(e -> { // adds logout functionality, if user confirms the login is displayed
             String logoutMessage = "Are you sure you want to logout?";
             int result = JOptionPane.showConfirmDialog(frame, logoutMessage, "Confirm Logout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
@@ -425,6 +464,7 @@ public class StoreView {
         headerPanel.add(storeLabel, BorderLayout.LINE_START);
         headerPanel.add(buttonPanel, BorderLayout.LINE_END);
 
+        // creation of cart product entry panel begins
         JPanel cartPanel = new JPanel(new BorderLayout());
         cartPanel.setPreferredSize(new Dimension(320, 300));
         cartPanel.setBackground(ClientSettings.ColorPalette.MED_BLUE);
@@ -445,6 +485,7 @@ public class StoreView {
         cartCheckoutButton.setFont(ClientSettings.FontList.FONT_22);
         cartCheckoutButton.setMargin(new Insets(0, 10, 0, 10));
 
+        // placing the cart entry panel into a scrollable viewport
         JScrollPane scrollCartPane = new JScrollPane(cartProductPanel);
         scrollCartPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollCartPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -457,6 +498,7 @@ public class StoreView {
         cartPanel.add(scrollCartPane, BorderLayout.CENTER);
         cartPanel.add(cartCheckoutPanel, BorderLayout.PAGE_END);
 
+        // attaching cart button state to visibility of cart JPanel
         cartButton.addActionListener(e -> {
             AbstractButton button = (AbstractButton) e.getSource();
             cartPanel.setVisible(button.getModel().isSelected());
@@ -464,30 +506,29 @@ public class StoreView {
 
         cartCheckoutButton.addActionListener(e -> checkout());
 
+        // retrieving relevant data from the inventory (for products panel) and users cart (for cart panel)
         List<List<Object>> inventoryArray = store.getInventoryInfo();
         List<List<Object>> cartArray = cart.getCartInfo();
 
+        // updating products panel with current inventory
         for (List<Object> item : inventoryArray) {
             int stock = (int) item.get(0);
             Product product = (Product) item.get(1);
             productsPanel.add(createProductPanel(product, stock));
         }
 
+        // updating cart entries with current user cart
         for (List<Object> item : cartArray) {
             int units = (int) item.get(0);
             Product product = (Product) item.get(1);
             cartProductPanel.add(createCartProductPanel(product, units));
         }
 
-        JScrollPane scrollProductPane = new JScrollPane(productsPanel);
-        scrollProductPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollProductPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollProductPane.getVerticalScrollBar().setUnitIncrement(20);
-
         mainPanel.add(headerPanel, BorderLayout.PAGE_START);
         mainPanel.add(scrollProductPane, BorderLayout.CENTER);
         mainPanel.add(cartPanel, BorderLayout.LINE_END);
 
+        // setting cart entry panel to hidden on start
         cartPanel.setVisible(false);
 
         frame.add(mainPanel);
@@ -505,6 +546,7 @@ public class StoreView {
      */
     private JPanel createProductPanel(Product product, int stock) {
 
+        // creates bare panel
         JPanel productPanel = new JPanel(new BorderLayout());
         productPanel.setPreferredSize(new Dimension(0, 200));
         productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
@@ -512,19 +554,23 @@ public class StoreView {
         productPanel.setBorder(new CompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 2),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
+        // adds panel to the directory, attaching it to the associated product through a HashMap key from product UUID
         List<JPanel> panelList = new ArrayList<>();
         panelList.add(productPanel);
         productDirectory.put(product.getID(), panelList);
 
+        // gets the image from the product object and scales it correctly
         ImageIcon img = new ImageIcon(product.getImage());
         ImageIcon productImageIcon = new ImageIcon(img.getImage().getScaledInstance(180, 180, Image.SCALE_DEFAULT));
-
         JLabel productImage = new JLabel(productImageIcon);
 
+        // generates the panel with all product details and interaction components
         JPanel productDetailsPanel = new JPanel(new BorderLayout());
         productDetailsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         productDetailsPanel.setBackground(Color.WHITE);
 
+        // create title and description labels
         JLabel productTitle = new JLabel(product.getName());
         productTitle.setFont(ClientSettings.FontList.FONT_22);
 
@@ -544,33 +590,37 @@ public class StoreView {
         itemCartPanel.setBackground(Color.WHITE);
         itemInfoPanel.setBackground(Color.WHITE);
 
+        // create add to cart button
         JButton addToCart = new JButton("Add to Cart");
         addToCart.setFont(ClientSettings.FontList.FONT_16);
         addToCart.setPreferredSize(new Dimension(130, 32));
 
+        // create label indicating current stock
         JLabel stockLabel = new JLabel(Integer.toString(stock));
         stockLabel.setFont(ClientSettings.FontList.FONT_16);
         setLabelWidth(stockLabel);
         stockLabel.setBorder(BorderFactory.createTitledBorder("Stock"));
 
-        String priceString = new DecimalFormat("#,##0.00").format(product.getPrice());
-
-        JLabel priceLabel = new JLabel("$" + priceString);
+        // create label indicating price of product in proper formatting
+        String priceString = new DecimalFormat("$#,##0.00").format(product.getPrice());
+        JLabel priceLabel = new JLabel(priceString);
         priceLabel.setFont(ClientSettings.FontList.FONT_16);
         setLabelWidth(priceLabel);
         priceLabel.setBorder(BorderFactory.createTitledBorder("Price"));
 
+        // generate spinner for user to input desired stock to add to cart
         SpinnerModel unitModel = new SpinnerNumberModel(0, 0, stock, 1);
-
         JSpinner unitSpinner = new JSpinner(unitModel);
         unitSpinner.setFont(ClientSettings.FontList.FONT_22);
         unitSpinner.setPreferredSize(new Dimension(80, 32));
 
+        // action listener that gets spinner amount and creates a new product entry
         addToCart.addActionListener(e -> {
 
             int units = (int) unitSpinner.getValue();
             boolean exist = true;
 
+            // try to find the object in the cart, if it does not exist set exist flag to false
             try {
                 cart.getUnits(product.getID());
             } catch (IllegalArgumentException err) {
@@ -580,19 +630,23 @@ public class StoreView {
             if (units > 0) {
                 addToCart(product, units);
                 if (!exist) {
+                    // if it doesn't exist, create a new cart entry
                     JPanel panel = createCartProductPanel(product, units);
                     List<JPanel> panels = productDirectory.get(product.getID());
                     panels.add(panel);
                     cartProductPanel.add(panel);
                 } else {
+                    // otherwise, just update the cart units label
                     updateCartUnitsLabel(product);
                 }
 
+                // set spinner max to the new stock available in inventory
                 int newStock = store.getStock(product.getID());
                 unitSpinner.setModel(new SpinnerNumberModel(0, 0, newStock, 1));
             }
         });
 
+        // lay out all panels in correct positions
         itemCartPanel.add(unitSpinner);
         itemCartPanel.add(addToCart);
 
@@ -609,6 +663,7 @@ public class StoreView {
         productPanel.add(productImage, BorderLayout.LINE_START);
         productPanel.add(productDetailsPanel, BorderLayout.CENTER);
 
+        // once laid out, return the generated panel
         return productPanel;
     }
 
@@ -620,6 +675,7 @@ public class StoreView {
      */
     private JPanel createCartProductPanel(Product product, int units) {
 
+        // create main panel
         JPanel productPanel = new JPanel(new BorderLayout());
         productPanel.setPreferredSize(new Dimension(0, 100));
         productPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
@@ -628,11 +684,12 @@ public class StoreView {
                 BorderFactory.createLineBorder(Color.BLACK, 1),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
+        // create resized image
         ImageIcon img = new ImageIcon(product.getImage());
         ImageIcon productImageIcon = new ImageIcon(img.getImage().getScaledInstance(90, 90, Image.SCALE_DEFAULT));
-
         JLabel productImage = new JLabel(productImageIcon);
 
+        // generate title (word wrapped enabled with HTML)
         JLabel productTitle = new JLabel("<html><body width='100%'>" + product.getName() + "</body></html>");
         productTitle.setFont(ClientSettings.FontList.FONT_16);
         productTitle.setPreferredSize(new Dimension(180 + 20, 62));
@@ -641,49 +698,60 @@ public class StoreView {
         JPanel productDetailsPanel = new JPanel(new BorderLayout());
         productDetailsPanel.setBackground(Color.WHITE);
 
+        JPanel selectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        selectPanel.setBackground(Color.WHITE);
+
+        // create remove button
         JButton removeFromCart = new JButton("Remove");
         removeFromCart.setFont(ClientSettings.FontList.FONT_12);
         removeFromCart.setPreferredSize(new Dimension(60, 20));
         removeFromCart.setMargin(new Insets(1, 1, 1, 1));
 
+        // create spinner for units in cart
         int stock = store.getStock(product.getID());
         SpinnerModel unitModel = new SpinnerNumberModel(units, 0, units + stock, 1);
-
         JSpinner unitSpinner = new JSpinner(unitModel);
         unitSpinner.setFont(ClientSettings.FontList.FONT_12);
         unitSpinner.setPreferredSize(new Dimension(50, 20));
 
+        // create string that shows the price of each unit
         String priceString = new DecimalFormat(" $#,##0.00").format(product.getPrice());
-
         JLabel productPrice = new JLabel(priceString);
         productPrice.setFont(ClientSettings.FontList.FONT_12);
         productPrice.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 1, true));
         productPrice.setPreferredSize(new Dimension(70, 20));
 
+        // allows spinner to add/remove stock and units as appropriate dynamically
         unitSpinner.addChangeListener(e -> {
 
             int currentUnits = cart.getUnits(product.getID());
+            int currentSpinnerValue = (int) unitSpinner.getValue();
 
-            int newSpinnerVal = (int) unitSpinner.getValue();
-            boolean increase = currentUnits < newSpinnerVal;
+            // check if current units in store is less than the current spinner value; if so, it was increased
+            boolean increase = currentUnits < currentSpinnerValue;
 
-            if (newSpinnerVal == 0) {
+            if (currentSpinnerValue == 0) {
+                // if spinner is put down to 0, remove the product from cart
                 removeFromCart(product, cart.getUnits(product.getID()));
                 List<JPanel> panels = productDirectory.get(product.getID());
                 cartProductPanel.remove(panels.get(1));
                 cartProductPanel.repaint();
                 panels.remove(1);
             } else if (increase) {
-                addToCart(product, newSpinnerVal - currentUnits);
+                // if increasing, add the difference in units to cart
+                addToCart(product, currentSpinnerValue - currentUnits);
             } else {
-                removeFromCart(product, currentUnits - newSpinnerVal);
+                // if decreasing, remove the difference in units from cart
+                removeFromCart(product, currentUnits - currentSpinnerValue);
             }
 
+            // once complete, update all labels for product stock and the cart entry
             updateProductStockLabel(product);
             updateCartTotal();
 
         });
 
+        // if remove button is pressed, remove the item from cart
         removeFromCart.addActionListener(e -> {
             removeFromCart(product, cart.getUnits(product.getID()));
             List<JPanel> panels = productDirectory.get(product.getID());
@@ -691,9 +759,6 @@ public class StoreView {
             cartProductPanel.repaint();
             panels.remove(1);
         });
-
-        JPanel selectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        selectPanel.setBackground(Color.WHITE);
 
         selectPanel.add(removeFromCart);
         selectPanel.add(unitSpinner);
@@ -705,6 +770,7 @@ public class StoreView {
         productPanel.add(productDetailsPanel, BorderLayout.LINE_END);
         productPanel.add(productImage, BorderLayout.LINE_START);
 
+        // once all panels are laid out, return the JPanel
         return productPanel;
     }
 
@@ -724,7 +790,8 @@ public class StoreView {
      * @param product Product that requires updating
      */
     private void updateProductStockLabel(Product product) {
-        JPanel productPanel = productDirectory.get(product.getID()).get(0);
+        JPanel productPanel = productDirectory.get(product.getID()).get(0); // get the main panel of the product
+        // go through each list of children and get their components until navigated to the correct label/spinner
         Component[] c1 = productPanel.getComponents();
         Component[] c2 = ((JPanel) c1[1]).getComponents();
         Component[] c3 = ((JPanel) c2[2]).getComponents();
@@ -733,7 +800,9 @@ public class StoreView {
         JLabel label = (JLabel) c40[1];
         JSpinner spinner = (JSpinner) c41[0];
         int stock = store.getStock(product.getID());
+        // once label and spinner is found, as well as the current stock, update them
         label.setText(Integer.toString(stock));
+        // eliminates triggering of changeListener and updates the max value
         spinner.setModel(new SpinnerNumberModel(0, 0, stock, 1));
     }
 
@@ -743,13 +812,15 @@ public class StoreView {
      */
     private void updateCartUnitsLabel(Product product) {
         UUID id = product.getID();
-        JPanel productPanel = productDirectory.get(id).get(1);
+        JPanel productPanel = productDirectory.get(id).get(1); // get cart entry panel of the product
+        // like updateProductStockLabel, go through all children to find desired spinner
         Component[] c1 = productPanel.getComponents();
         Component[] c2 = ((JPanel) c1[0]).getComponents();
         Component[] c3 = ((JPanel) c2[1]).getComponents();
         JSpinner spinner = (JSpinner) c3[1];
         int stock = store.getStock(id);
         int units = cart.getUnits(id);
+        // update spinner model and value
         spinner.setModel(new SpinnerNumberModel(units, 0, units + stock, 1));
     }
 
@@ -757,6 +828,7 @@ public class StoreView {
      * Method to refresh the cart total label
      */
     private void updateCartTotal() {
+        // calculates the cart total and refreshes the total checkout price
         double newTotal = calculateCartTotal();
         String priceString = new DecimalFormat("Total: $#,##0.00").format(newTotal);
         totalLabel.setText(priceString);
@@ -766,46 +838,76 @@ public class StoreView {
      * Method to checkout the user and display a receipt once completed
      */
     private void checkout() {
+
         double newTotal = calculateCartTotal();
+
         if (newTotal > 0) {
 
             DecimalFormat priceFormat = new DecimalFormat("$#,##0.00");
 
-            String confirmMessage = "<html>Are you sure you want to checkout?<br><br><p style='font-size: large'>Total: " + priceFormat.format(newTotal) + "</p></html>";
+            // ask user to verify they want to checkout
+            String confirmMessage = "<html>Are you sure you want to checkout?<br>" +
+                    "<br><p style='font-size: large'>Total: " + priceFormat.format(newTotal) + "</p></html>";
             int result = JOptionPane.showConfirmDialog(frame, confirmMessage, "Confirm Checkout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
 
+                // retrieve current cart listings
                 List<List<Object>> cartInfo = cart.getCartInfo();
 
-                String htmlStart = "<html> <style>table, tr, td{text-align: left; padding: 3px; border-collapse: collapse;}.name{width: 300px; border: 1px solid black;}.item{min-width: 100px; text-align: center; border: 1px solid black;}.name-main{min-width: 300px; font-size: large;}.item-main{min-width: 100px; text-align: center; font-size: large;}</style> <table> <tr> <td class='name-main'> Product </td><td class='item-main'> Price/Unit </td><td class='item-main'> Units </td><td class='item-main'> Total </td></tr>";
-                String totalString = String.format("<tr> <td colspan='3' class='name-main'> Total: </td><td class='item-main'> %s </td></tr>", priceFormat.format(newTotal));
+                // HTML formatted table base strings
+                String htmlStart = "<html>" +
+                        "<style>" +
+                        "table, tr, td {text-align: left; padding: 3px; border-collapse: collapse;}" +
+                        ".name {width: 300px; border: 1px solid black;}" +
+                        ".item {min-width: 100px; text-align: center; border: 1px solid black;}" +
+                        ".name-main {min-width: 300px; font-size: large;}" +
+                        ".item-main {min-width: 100px; text-align: center; font-size: large;}" +
+                        "</style> " +
+                        "<table> <tr> " +
+                        "<td class='name-main'> Product </td>" +
+                        "<td class='item-main'> Price/Unit </td>" +
+                        "<td class='item-main'> Units </td>" +
+                        "<td class='item-main'> Total </td>" +
+                        "</tr>";
+                String totalString = String.format("<tr> " +
+                        "<td colspan='3' class='name-main'> Total: </td>" +
+                        "<td class='item-main'> %s </td>" +
+                        "</tr>", priceFormat.format(newTotal));
                 String htmlEnd = "</table></html>";
 
+                // create a formatted string the append the start string, product strings,
+                // total string, and end string
                 StringBuilder formattedString = new StringBuilder();
                 formattedString.append(htmlStart);
                 for (List<Object> item : cartInfo) {
+
                     Product product = (Product) item.get(1);
                     String name = product.getName();
                     double price = product.getPrice();
                     int units = (int) item.get(0);
                     double subtotal = price * units;
-                    String productString = String.format("<tr> <td class='name'> %s </td><td class='item'> %s </td><td class='item'> %d </td><td class='item'> %s </td></tr>", name, priceFormat.format(price), units, priceFormat.format(subtotal));
+
+                    // create formatted string for each product listing
+                    String productString = String.format("<tr> " +
+                            "<td class='name'> %s </td>" +
+                            "<td class='item'> %s </td>" +
+                            "<td class='item'> %d </td>" +
+                            "<td class='item'> %s </td>" +
+                            "</tr>", name, priceFormat.format(price), units, priceFormat.format(subtotal));
+
                     formattedString.append(productString);
                 }
                 formattedString.append(totalString);
                 formattedString.append(htmlEnd);
 
+                // display the receipt
                 dialog("plain", formattedString.toString(), "Transaction Receipt");
 
+                // upon OK make the transaction, remove all cart panels, and update all requires labels
                 store.transaction(this);
                 cartProductPanel.removeAll();
                 cartProductPanel.repaint();
                 updateCartTotal();
-
-                // added because it was required by the PDF but works perfectly logging in and out
-                // may remove these two lines to make it a seamless system
-                frame.setVisible(false);
-                frame.dispose();
             }
 
         } else {
@@ -821,6 +923,7 @@ public class StoreView {
 
         List<List<Object>> cartList = cart.getCartInfo();
 
+        // go through all items in cart and sum the price * units bought
         double total = 0.0;
         for (List<Object> item : cartList) {
             Product product = (Product) item.get(1);
