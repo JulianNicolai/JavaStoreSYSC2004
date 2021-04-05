@@ -172,7 +172,7 @@ public class StoreView {
      */
     private static void frameInit() {
 
-        ImageIcon img = new ImageIcon("images/icon.png");
+        ImageIcon img = new ImageIcon("src/com/company/images/icon.png");
         frame.setIconImage(img.getImage());
 
         frame.setMinimumSize(new Dimension(ClientSettings.WIDTH, ClientSettings.HEIGHT));
@@ -398,8 +398,8 @@ public class StoreView {
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         buttonPanel.setBackground(ClientSettings.ColorPalette.DARK_BLUE);
 
-        ImageIcon cartImg = new ImageIcon("images/cart.png");
-        ImageIcon logoutImg = new ImageIcon("images/logout.png");
+        ImageIcon cartImg = new ImageIcon("src/com/company/images/cart.png");
+        ImageIcon logoutImg = new ImageIcon("src/com/company/images/logout.png");
 
         JToggleButton cartButton = new JToggleButton("<html><center>View<br>My Cart</center><html>", cartImg);
         cartButton.setMargin(new Insets(1, 5, 1, 5));
@@ -771,7 +771,7 @@ public class StoreView {
 
             DecimalFormat priceFormat = new DecimalFormat("$#,##0.00");
 
-            String confirmMessage = "<html>Are you sure you want to checkout?<br>Total: " + priceFormat.format(newTotal) + "</html>";
+            String confirmMessage = "<html>Are you sure you want to checkout?<br><br><p style='font-size: large'>Total: " + priceFormat.format(newTotal) + "</p></html>";
             int result = JOptionPane.showConfirmDialog(frame, confirmMessage, "Confirm Checkout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
 
@@ -801,6 +801,11 @@ public class StoreView {
                 cartProductPanel.removeAll();
                 cartProductPanel.repaint();
                 updateCartTotal();
+
+                // added because it was required by the PDF but works perfectly logging in and out
+                // may remove these two lines to make it a seamless system
+                frame.setVisible(false);
+                frame.dispose();
             }
 
         } else {
