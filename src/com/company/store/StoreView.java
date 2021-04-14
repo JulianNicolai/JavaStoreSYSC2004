@@ -396,12 +396,6 @@ public class StoreView {
     public void clearCart() { cart.clear(); }
 
     /**
-     * Proxy method to retrieve transaction data from the ShoppingCart
-     * @return returns 2D list of all products and number of units
-     */
-    public List<List<Object>> getCartInfo() { return cart.getProductStockInfo(); }
-
-    /**
      * Method to start the interface of a user
      */
     public void displayGUI() {
@@ -501,21 +495,17 @@ public class StoreView {
         cartCheckoutButton.addActionListener(e -> checkout());
 
         // retrieving relevant data from the inventory (for products panel) and users cart (for cart panel)
-        List<List<Object>> inventoryArray = store.getInventoryInfo();
-        List<List<Object>> cartArray = cart.getProductStockInfo();
+        List<ProductEntry> inventoryArray = store.getProductStockInfo();
+        List<ProductEntry> cartArray = cart.getProductStockInfo();
 
         // updating products panel with current inventory
-        for (List<Object> item : inventoryArray) {
-            int stock = (int) item.get(0);
-            Product product = (Product) item.get(1);
-            productsPanel.add(createProductPanel(product, stock));
+        for (ProductEntry productEntry : inventoryArray) {
+            productsPanel.add(createProductPanel(productEntry));
         }
 
         // updating cart entries with current user cart
-        for (List<Object> item : cartArray) {
-            int units = (int) item.get(0);
-            Product product = (Product) item.get(1);
-            cartProductPanel.add(createCartProductPanel(product, units));
+        for (ProductEntry productEntry : cartArray) {
+            cartProductPanel.add(createCartProductPanel(productEntry));
         }
 
         mainPanel.add(headerPanel, BorderLayout.PAGE_START);
@@ -533,12 +523,14 @@ public class StoreView {
     }
 
     /**
-     * Method to generate a product panel from a Product object and available stock
-     * @param product Product object to set labels to
-     * @param stock Stock available
+     * Method to generate a product panel
+     * @param productEntry ProductEntry to create a new panel from
      * @return Completed JPanel
      */
-    private JPanel createProductPanel(Product product, int stock) {
+    private JPanel createProductPanel(ProductEntry productEntry) {
+
+        Product product = productEntry.getProduct();
+        int stock = productEntry.getStock();
 
         // creates bare panel
         JPanel productPanel = new JPanel(new BorderLayout());
@@ -625,7 +617,7 @@ public class StoreView {
                 addToCart(product, units);
                 if (!exist) {
                     // if it doesn't exist, create a new cart entry
-                    JPanel panel = createCartProductPanel(product, units);
+                    JPanel panel = createCartProductPanel(productEntry);
                     List<JPanel> panels = productDirectory.get(product.getID());
                     panels.add(panel);
                     cartProductPanel.add(panel);
@@ -635,7 +627,7 @@ public class StoreView {
                 }
 
                 // set spinner max to the new stock available in inventory
-                int newStock = store.getStock(product);
+                int newStock = store.getProductQuantity(product);
                 unitSpinner.setModel(new SpinnerNumberModel(0, 0, newStock, 1));
             }
         });
@@ -662,12 +654,14 @@ public class StoreView {
     }
 
     /**
-     * Method to generate a cart entry panel from a Product and added units
-     * @param product Product object to set labels to
-     * @param units Units in cart
+     * Method to generate a cart entry panel
+     * @param productEntry ProductEntry to create cart panel from
      * @return Completed JPanel
      */
-    private JPanel createCartProductPanel(Product product, int units) {
+    private JPanel createCartProductPanel(ProductEntry productEntry) {
+
+        Product product = productEntry.getProduct();
+        int units = productEntry.getStock();
 
         // create main panel
         JPanel productPanel = new JPanel(new BorderLayout());
@@ -702,7 +696,7 @@ public class StoreView {
         removeFromCart.setMargin(new Insets(1, 1, 1, 1));
 
         // create spinner for units in cart
-        int stock = store.getStock(product);
+        int stock = store.getProductQuantity(product);
         SpinnerModel unitModel = new SpinnerNumberModel(units, 0, units + stock, 1);
         JSpinner unitSpinner = new JSpinner(unitModel);
         unitSpinner.setFont(ClientSettings.FontList.FONT_12);
@@ -793,7 +787,7 @@ public class StoreView {
         Component[] c41 = ((JPanel) c3[1]).getComponents();
         JLabel label = (JLabel) c40[1];
         JSpinner spinner = (JSpinner) c41[0];
-        int stock = store.getStock(product);
+        int stock = store.getProductQuantity(product);
         // once label and spinner is found, as well as the current stock, update them
         label.setText(Integer.toString(stock));
         // eliminates triggering of changeListener and updates the max value
@@ -811,7 +805,7 @@ public class StoreView {
         Component[] c2 = ((JPanel) c1[0]).getComponents();
         Component[] c3 = ((JPanel) c2[1]).getComponents();
         JSpinner spinner = (JSpinner) c3[1];
-        int stock = store.getStock(product);
+        int stock = store.getProductQuantity(product);
         int units = cart.getProductQuantity(product);
         // update spinner model and value
         spinner.setModel(new SpinnerNumberModel(units, 0, units + stock, 1));
@@ -845,7 +839,7 @@ public class StoreView {
             if (result == JOptionPane.OK_OPTION) {
 
                 // retrieve current cart listings
-                List<List<Object>> cartInfo = cart.getProductStockInfo();
+                List<ProductEntry> cartInfo = cart.getProductStockInfo();
 
                 // HTML formatted table base strings
                 String htmlStart = "<html>" +
@@ -872,12 +866,12 @@ public class StoreView {
                 // total string, and end string
                 StringBuilder formattedString = new StringBuilder();
                 formattedString.append(htmlStart);
-                for (List<Object> item : cartInfo) {
+                for (ProductEntry item : cartInfo) {
 
-                    Product product = (Product) item.get(1);
+                    int units = item.getStock();
+                    Product product = item.getProduct();
                     String name = product.getName();
                     double price = product.getPrice();
-                    int units = (int) item.get(0);
                     double subtotal = price * units;
 
                     // create formatted string for each product listing
@@ -897,7 +891,7 @@ public class StoreView {
                 dialog("plain", formattedString.toString(), "Transaction Receipt");
 
                 // upon OK make the transaction, remove all cart panels, and update all requires labels
-                store.transaction(this);
+                this.clearCart();
                 cartProductPanel.removeAll();
                 cartProductPanel.repaint();
                 updateCartTotal();
@@ -914,13 +908,13 @@ public class StoreView {
      */
     private double calculateCartTotal() {
 
-        List<List<Object>> cartList = cart.getProductStockInfo();
+        List<ProductEntry> cartList = cart.getProductStockInfo();
 
         // go through all items in cart and sum the price * units bought
         double total = 0.0;
-        for (List<Object> item : cartList) {
-            Product product = (Product) item.get(1);
-            int units = (int) item.get(0);
+        for (ProductEntry item : cartList) {
+            Product product = item.getProduct();
+            int units = item.getStock();
             total += product.getPrice() * units;
         }
         return total;

@@ -8,7 +8,7 @@ import java.util.*;
  * Interface to manage active users and the store Inventory
  * @author Julian Nicolai 101154233
  */
-public class StoreManager {
+public class StoreManager implements ProductStockContainer {
 
     /**
      * Inventory object that stores all products and their stock
@@ -29,61 +29,42 @@ public class StoreManager {
     }
 
     /**
-     * Method to retrieve current users in StoreManager
-     * @return List of users
+     * Proxy method to add stock to the inventory
+     * @param product Product to add stock
+     * @param numUnits number of units to be added
      */
-    public List<StoreView> getUsers() { return this.users; }
-
-    /**
-     * Method to calculate transaction total and clear the users cart
-     * @param user the StoreView user to process the transaction for
-     * @return the total transaction price as a double
-     */
-    public double transaction(StoreView user) {
-
-        double transactionTotal = 0.0;
-
-        List<List<Object>> userTransactionData = user.getCartInfo();
-
-        for (List<Object> productData : userTransactionData) {
-
-            Integer numUnits = (Integer) productData.get(0);
-            Product product = (Product) productData.get(1);
-
-            transactionTotal += product.getPrice() * numUnits;
-        }
-
-        user.clearCart();
-
-        return transactionTotal;
-    }
+    @Override
+    public void addProductQuantity(Product product, int numUnits) { inventory.addProductQuantity(product, numUnits); }
 
     /**
      * Proxy method to remove stock from the inventory
      * @param product Product to remove stock
      * @param numUnits number of units to be removed
      */
-    public void removeStock(Product product, int numUnits) { inventory.removeProductQuantity(product, numUnits); }
-
-    /**
-     * Proxy method to add stock to the inventory
-     * @param product Product to add stock
-     * @param numUnits number of units to be added
-     */
-    public void addStock(Product product, int numUnits) { inventory.addProductQuantity(product, numUnits); }
+    @Override
+    public void removeProductQuantity(Product product, int numUnits) { inventory.removeProductQuantity(product, numUnits); }
 
     /**
      * Method to retrieve stock using a specific product ID
      * @param product product to retrieve
      * @return integer of stock available
      */
-    public int getStock(Product product) { return inventory.getProductQuantity(product); }
+    @Override
+    public int getProductQuantity(Product product) { return inventory.getProductQuantity(product); }
+
+    /**
+     * Method to retrieve the number of products in cart
+     * @return int number of products
+     */
+    @Override
+    public int getNumOfProducts() { return inventory.getNumOfProducts(); }
 
     /**
      * Proxy method to retrieve information about the products contained in Inventory
      * @return 2D list of objects containing the product and its stock
      */
-    public List<List<Object>> getInventoryInfo() { return inventory.getProductStockInfo(); }
+    @Override
+    public List<ProductEntry> getProductStockInfo() { return inventory.getProductStockInfo(); }
 
     /**
      * Method to add a new user to the StoreManager
@@ -100,4 +81,10 @@ public class StoreManager {
         }
         if (!foundFlag) users.add(storeView);
     }
+
+    /**
+     * Method to retrieve current users in StoreManager
+     * @return List of users
+     */
+    public List<StoreView> getUsers() { return this.users; }
 }

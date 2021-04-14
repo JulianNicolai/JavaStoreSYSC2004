@@ -1,7 +1,13 @@
+// Julian Nicolai 101154233
+
 package com.company.store;
 
 import java.util.*;
 
+/**
+ * Interface for all product aggregation objects with associated stock
+ * @author Julian Nicolai 101154233
+ */
 public interface ProductStockContainer {
 
     /**
@@ -35,6 +41,6 @@ public interface ProductStockContainer {
      * Method to retrieve all product info in container
      * @return List of all products and their associated stock
      */
-    List<List<Object>> getProductStockInfo();
+    List<ProductEntry> getProductStockInfo();
 
 }

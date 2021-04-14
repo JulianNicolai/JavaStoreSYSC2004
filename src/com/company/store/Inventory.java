@@ -36,29 +36,6 @@ public class Inventory implements ProductStockContainer {
     }
 
     /**
-     * ProductEntry static nested class is used to associate a product with its stock
-     */
-    private static class ProductEntry {
-
-        private final Product product;
-        private int stock;
-
-        public ProductEntry() { this(new Product(), -1); }
-
-        public ProductEntry(Product product, int stock) {
-            this.product = product;
-            this.stock = stock;
-        }
-
-        // accessors
-        public Product getProduct() { return this.product; }
-        public int getStock() { return this.stock; }
-
-        // mutators
-        public void setStock(int stock) { this.stock = stock; }
-    }
-
-    /**
      * Method used to retrieve a ProductEntry object via the Product's ID
      * @param product Product to retrieve entry for
      * @return ProductEntry object of ID, returns null product if doesn't exist
@@ -150,21 +127,6 @@ public class Inventory implements ProductStockContainer {
      * @return List of all products and their data in a 2D list
      */
     @Override
-    public List<List<Object>> getProductStockInfo() {
-
-        List<List<Object>> inventoryList = new ArrayList<>();
-
-        for (ProductEntry entry : productList) {
-
-            List<Object> infoArray = new ArrayList<>();
-
-            infoArray.add(entry.getStock());
-            infoArray.add(entry.getProduct());
-
-            inventoryList.add(infoArray);
-        }
-
-        return inventoryList;
-    }
+    public List<ProductEntry> getProductStockInfo() { return productList; }
 
 }

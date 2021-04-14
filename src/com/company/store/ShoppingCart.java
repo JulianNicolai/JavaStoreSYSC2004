@@ -11,9 +11,9 @@ import java.util.*;
 public class ShoppingCart implements ProductStockContainer {
 
     /**
-     * List of CartEntry's containing product and units to be purchased
+     * List of ProductEntry's containing product and units to be purchased
      */
-    private final List<CartEntry> cartList;
+    private final List<ProductEntry> cartList;
 
     /**
      * StoreManager the shopping cart is using
@@ -29,50 +29,27 @@ public class ShoppingCart implements ProductStockContainer {
     }
 
     /**
-     * CartEntry static nested class is used to associate a product with the number of units in a users cart
-     */
-    private static class CartEntry {
-
-        private final Product product;
-        private int units;
-
-        public CartEntry() { this(new Product(), -1); }
-
-        public CartEntry(Product product, int units) {
-            this.product = product;
-            this.units = units;
-        }
-
-        // accessors
-        public Product getProduct() { return this.product; }
-        public int getStock() { return this.units; }
-
-        // mutators
-        public void setUnits(int units) { this.units = units; }
-    }
-
-    /**
-     * Method used to retrieve a CartEntry object via the Product's ID
+     * Method used to retrieve a ProductEntry object via the Product's ID
      * @param product Product to retrieve
-     * @return CartEntry object of ID, returns null product if doesn't exist
+     * @return ProductEntry object of ID, returns null product if doesn't exist
      */
-    private CartEntry getCartEntry(Product product) {
+    private ProductEntry getProductEntry(Product product) {
 
-        CartEntry matchingCartEntry = new CartEntry(); // starting state is no matching CartEntry (null product)
+        ProductEntry matchingProductEntry = new ProductEntry(); // starting state is no matching ProductEntry (null product)
         UUID id = product.getID();
 
-        if (cartList.size() == 0) return matchingCartEntry; // if empty, return null CartEntry for no match
+        if (cartList.size() == 0) return matchingProductEntry; // if empty, return null ProductEntry for no match
 
         // search for matching product entry
-        for (CartEntry currentCartEntry : cartList) {
-            if (currentCartEntry.getProduct().getID().equals(id)) {
-                matchingCartEntry = currentCartEntry;
+        for (ProductEntry currentProductEntry : cartList) {
+            if (currentProductEntry.getProduct().getID().equals(id)) {
+                matchingProductEntry = currentProductEntry;
                 break;
             }
         }
 
         // return match, if nothing is found remains null product
-        return matchingCartEntry;
+        return matchingProductEntry;
 
     }
 
@@ -84,11 +61,11 @@ public class ShoppingCart implements ProductStockContainer {
     @Override
     public void addProductQuantity(Product product, int numStock) {
 
-        CartEntry cartEntry = getCartEntry(product);
+        ProductEntry productEntry = getProductEntry(product);
 
-        store.removeStock(product, numStock);
-        if (cartEntry.getProduct().getName() == null) cartList.add(new CartEntry(product, numStock));
-        else cartEntry.setUnits(cartEntry.getStock() + numStock);
+        store.removeProductQuantity(product, numStock);
+        if (productEntry.getProduct().getName() == null) cartList.add(new ProductEntry(product, numStock));
+        else productEntry.setStock(productEntry.getStock() + numStock);
 
     }
 
@@ -100,16 +77,16 @@ public class ShoppingCart implements ProductStockContainer {
     @Override
     public void removeProductQuantity(Product product, int numStock) {
 
-        CartEntry cartEntry = getCartEntry(product);
+        ProductEntry productEntry = getProductEntry(product);
 
-        if (cartEntry.getProduct().getName() == null) {
+        if (productEntry.getProduct().getName() == null) {
             throw new IllegalArgumentException("Product specified does not exist in your cart.");
-        } else if (cartEntry.getStock() < numStock) {
+        } else if (productEntry.getStock() < numStock) {
             throw new IllegalArgumentException("Cannot remove more items than exist in your cart.");
         } else {
-            store.addStock(product, numStock);
-            if (cartEntry.getStock() - numStock == 0) cartList.remove(cartEntry);
-            else cartEntry.setUnits(cartEntry.getStock() - numStock);
+            store.addProductQuantity(product, numStock);
+            if (productEntry.getStock() - numStock == 0) cartList.remove(productEntry);
+            else productEntry.setStock(productEntry.getStock() - numStock);
         }
 
     }
@@ -122,12 +99,12 @@ public class ShoppingCart implements ProductStockContainer {
     @Override
     public int getProductQuantity(Product product) {
 
-        CartEntry cartEntry = getCartEntry(product);
+        ProductEntry productEntry = getProductEntry(product);
 
-        if (cartEntry.getProduct().getName() == null)
+        if (productEntry.getProduct().getName() == null)
             throw new IllegalArgumentException("The product requested does not exist.");
 
-        return cartEntry.getStock();
+        return productEntry.getStock();
     }
 
     /**
@@ -142,22 +119,7 @@ public class ShoppingCart implements ProductStockContainer {
      * @return 2D list of cart data containing units, name, and price of each product
      */
     @Override
-    public List<List<Object>> getProductStockInfo() {
-
-        List<List<Object>> cartItemList = new ArrayList<>();
-
-        for (CartEntry cartEntry : cartList) {
-
-            List<Object> infoArray = new ArrayList<>();
-
-            infoArray.add(cartEntry.getStock());
-            infoArray.add(cartEntry.getProduct());
-
-            cartItemList.add(infoArray);
-        }
-
-        return cartItemList;
-    }
+    public List<ProductEntry> getProductStockInfo() { return cartList; }
 
     /**
      * Proxy method used to clear the cart of the ShoppingCart
