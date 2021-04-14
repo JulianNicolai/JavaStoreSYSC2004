@@ -76,7 +76,12 @@ public class StoreView {
         this.cartProductPanel = new JPanel();
         cartProductPanel.setLayout(new BoxLayout(cartProductPanel, BoxLayout.Y_AXIS));
         cartProductPanel.setBackground(Color.LIGHT_GRAY);
+
         this.totalLabel = new JLabel("Total: $0.00");
+        totalLabel.setFont(ClientSettings.FontList.FONT_22);
+        totalLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
+        totalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
         this.productDirectory = new HashMap<>();
 
         if (username.toLowerCase(Locale.ROOT).equals("username")) {
@@ -427,7 +432,7 @@ public class StoreView {
             String logoutMessage = "Are you sure you want to logout?";
             int result = JOptionPane.showConfirmDialog(frame, logoutMessage, "Confirm Logout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
-
+                cartProductPanel.removeAll();
                 displayLogin(store.getUsers());
             }
         });
@@ -454,10 +459,6 @@ public class StoreView {
 
         JPanel cartCheckoutPanel = new JPanel(new BorderLayout());
         cartCheckoutPanel.setBackground(ClientSettings.ColorPalette.MED_BLUE);
-
-        totalLabel.setFont(ClientSettings.FontList.FONT_22);
-        totalLabel.setForeground(ClientSettings.ColorPalette.LIGHTEST_BLUE);
-        totalLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         JButton cartCheckoutButton = new JButton("Checkout");
         cartCheckoutButton.setFont(ClientSettings.FontList.FONT_22);
@@ -607,7 +608,7 @@ public class StoreView {
                 addToCart(product, units);
                 if (!exist) {
                     // if it doesn't exist, create a new cart entry
-                    JPanel panel = createCartProductPanel(productEntry);
+                    JPanel panel = createCartProductPanel(new ProductEntry(product, units));
                     List<JPanel> panels = productDirectory.get(product.getID());
                     panels.add(panel);
                     cartProductPanel.add(panel);
