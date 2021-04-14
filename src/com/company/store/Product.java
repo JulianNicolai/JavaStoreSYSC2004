@@ -38,16 +38,15 @@ public class Product {
     /**
      * Null (empty) Product constructor
      */
-    public Product() { this(null, null, -0.0, null, null); }
+    public Product() { this(null, -0.0, null, null); }
 
     /**
      * Product constructor that requires all attributes as parameters
-     * @param id ID of the product
      * @param name Name of the product
      * @param price Price of the product
      */
-    public Product(UUID id, String name, double price, String image, String description) {
-        this.ID = id;
+    public Product(String name, double price, String image, String description) {
+        this.ID = UUID.randomUUID();
         this.name = name;
         this.price = price;
         this.image = image;

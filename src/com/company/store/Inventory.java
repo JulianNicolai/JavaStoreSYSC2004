@@ -8,7 +8,7 @@ import java.util.*;
  * Interface to manage the products and their stock
  * @author Julian Nicolai 101154233
  */
-public class Inventory {
+public class Inventory implements ProductStockContainer {
 
     /**
      * List of products and their stock (ProductEntry's)
@@ -21,14 +21,14 @@ public class Inventory {
     public Inventory() {
         this.productList = new ArrayList<>();
         try {
-            this.addNewProduct("1 Gallon Milk Jug (empty)", 15.99, 10, "src/com/company/images/product_images/milk.jpg", "Milk is an emulsion or colloid of butterfat globules within a water-based fluid that contains dissolved carbohydrates and protein aggregates with minerals.");
-            this.addNewProduct("Cheese", 12.95, 80, "src/com/company/images/product_images/cheese.jpg", "Cheese is a dairy product, derived from milk and produced in wide ranges of flavors, textures and forms by coagulation of the milk protein casein.");
-            this.addNewProduct("PHAT\u2122 Sandwich", 89.99, 3, "src/com/company/images/product_images/sandwich.jpg", "A sandwich is a food typically consisting of vegetables, sliced cheese or meat, placed on or between slices of bread, or more generally any dish wherein bread serves as a container or wrapper for another food type.");
-            this.addNewProduct("Artisan Loaf", 5.99, 14, "src/com/company/images/product_images/bread.jpg", "Bread is the product of baking a mixture of flour, water, salt, yeast and other ingredients and kneaded until a ball of dough is formed.");
-            this.addNewProduct("God Nuggs", 69.69, 2, "src/com/company/images/product_images/nuggets.jpg", "A chicken nugget is a food product consisting of a small piece of deboned chicken meat that is breaded or battered, then deep-fried or baked. ");
-            this.addNewProduct("55 Gallon Industrial Drum of Mountain Dew (included straw)", 420.69, 8, "src/com/company/images/product_images/dew.jpg", "Mountain Dew is a citrus-flavored soft drink, made by the PepsiCo company. The drink has more caffeine (a stimulant) than other soft drinks like Pepsi and Coca-Cola.");
-            this.addNewProduct("The Kids Meal", 2.99, 429, "src/com/company/images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside.");
-            this.addNewProduct("Lettuce (pre wilted)", 6.79, 23, "src/com/company/images/product_images/lettuce.jpg", "Lettuce, Lactuca sativa, is a leafy herbaceous annual or biennial plant in the family Asteraceae grown for its leaves which are used as a salad green.");
+            this.addProductQuantity(new Product("1 Gallon Milk Jug (empty)", 15.99, "src/com/company/images/product_images/milk.jpg", "Milk is an emulsion or colloid of butterfat globules within a water-based fluid that contains dissolved carbohydrates and protein aggregates with minerals."), 10);
+            this.addProductQuantity(new Product("Cheese", 12.95, "src/com/company/images/product_images/cheese.jpg", "Cheese is a dairy product, derived from milk and produced in wide ranges of flavors, textures and forms by coagulation of the milk protein casein."), 80);
+            this.addProductQuantity(new Product("PHAT\u2122 Sandwich", 89.99, "src/com/company/images/product_images/sandwich.jpg", "A sandwich is a food typically consisting of vegetables, sliced cheese or meat, placed on or between slices of bread, or more generally any dish wherein bread serves as a container or wrapper for another food type."), 3);
+            this.addProductQuantity(new Product("Artisan Loaf", 5.99, "src/com/company/images/product_images/bread.jpg", "Bread is the product of baking a mixture of flour, water, salt, yeast and other ingredients and kneaded until a ball of dough is formed."), 14);
+            this.addProductQuantity(new Product("God Nuggs", 69.69, "src/com/company/images/product_images/nuggets.jpg", "A chicken nugget is a food product consisting of a small piece of deboned chicken meat that is breaded or battered, then deep-fried or baked. "), 2);
+            this.addProductQuantity(new Product("55 Gallon Industrial Drum of Mountain Dew (included straw)", 420.69, "src/com/company/images/product_images/dew.jpg", "Mountain Dew is a citrus-flavored soft drink, made by the PepsiCo company. The drink has more caffeine (a stimulant) than other soft drinks like Pepsi and Coca-Cola."), 8);
+            this.addProductQuantity(new Product("The Kids Meal", 2.99, "src/com/company/images/product_images/kids_meal.jpg", "The kids' meal or children's meal is a fast food combination meal tailored to and marketed to children. Most kids' meals come in colourful bags or cardboard boxes with depictions of activities on the bag or box and a plastic toy inside."), 429);
+            this.addProductQuantity(new Product("Lettuce (pre wilted)", 6.79, "src/com/company/images/product_images/lettuce.jpg", "Lettuce, Lactuca sativa, is a leafy herbaceous annual or biennial plant in the family Asteraceae grown for its leaves which are used as a salad green."), 23);
         } catch (IllegalArgumentException err) {
             StoreView.dialog("system-error", err.getMessage(), "Invalid Parameter - Product Addition");
         }
@@ -60,12 +60,13 @@ public class Inventory {
 
     /**
      * Method used to retrieve a ProductEntry object via the Product's ID
-     * @param id ID of requested object
+     * @param product Product to retrieve entry for
      * @return ProductEntry object of ID, returns null product if doesn't exist
      */
-    private ProductEntry getProductEntryByID(UUID id) {
+    private ProductEntry getProductEntry(Product product) {
 
         ProductEntry matchingProductEntry = new ProductEntry(); // starting state is no matching ProductEntry (null product)
+        UUID id = product.getID();
 
         if (productList.size() == 0) return matchingProductEntry; // if empty, return null ProductEntry for no match
 
@@ -83,54 +84,34 @@ public class Inventory {
     }
 
     /**
-     * Method to add a new product to the inventory
-     * @param name Name of product
-     * @param price Price of product
-     * @param stock Amount of stock available for product
-     * @param description String description of product
-     * @param image String product image file location
-     * @return generated ID of added product
-     */
-    public UUID addNewProduct(String name, double price, int stock, String image, String description) {
-
-        if (price < 0.0 || stock < 0)
-            throw new IllegalArgumentException("Stock and price cannot be less than 0.");
-        if (name == null) {
-            throw new IllegalArgumentException("Product name cannot be null.");
-        } else {
-            UUID id = UUID.randomUUID();
-            Product newProduct = new Product(id, name, price, image, description);
-            ProductEntry newProductEntry = new ProductEntry(newProduct, stock);
-            this.productList.add(newProductEntry);
-            return id;
-        }
-
-    }
-
-    /**
-     * Method to add more stock to existing product
-     * @param id ID of requested object
+     * Method to add more stock to existing product or add new product
+     * @param product Product to add stock to
      * @param numStock amount of stock to add
      */
-    public void addStock(UUID id, int numStock) {
+    @Override
+    public void addProductQuantity(Product product, int numStock) {
 
-        ProductEntry productEntry = getProductEntryByID(id);
+        ProductEntry productEntry = getProductEntry(product);
 
-        if (numStock < 1) {
-            throw new IllegalArgumentException("Number of units must be 1 or more.");
+        if (numStock < 0) {
+            throw new IllegalArgumentException("Number of units must be 0 or more.");
         } else if (productEntry.getProduct().getName() == null) {
-            throw new IllegalArgumentException("The product requested does not exist.");
-        } else productEntry.setStock(productEntry.getStock() + numStock);
+            ProductEntry newProductEntry = new ProductEntry(product, numStock);
+            this.productList.add(newProductEntry);
+        } else {
+            productEntry.setStock(productEntry.getStock() + numStock);
+        }
     }
 
     /**
-     * Method to remove more stock to existing product
-     * @param id ID of requested object
+     * Method to remove stock from existing product
+     * @param product Product to remove stock from
      * @param numStock amount of stock to remove
      */
-    public void removeStock(UUID id, int numStock) {
+    @Override
+    public void removeProductQuantity(Product product, int numStock) {
 
-        ProductEntry productEntry = getProductEntryByID(id);
+        ProductEntry productEntry = getProductEntry(product);
         int stock = productEntry.getStock();
 
         if (numStock < 1) {
@@ -144,11 +125,12 @@ public class Inventory {
 
     /**
      * Method for retrieving the current stock of a Product
-     * @param id ID of desired Product
+     * @param product Product to retrieve
      * @return amount of stock
      */
-    public int getStock(UUID id) {
-        ProductEntry productEntry = getProductEntryByID(id);
+    @Override
+    public int getProductQuantity(Product product) {
+        ProductEntry productEntry = getProductEntry(product);
 
         if (productEntry.getProduct().getName() == null)
             throw new IllegalArgumentException("The product requested does not exist.");
@@ -157,10 +139,18 @@ public class Inventory {
     }
 
     /**
+     * Method to retrieve the number of products in inventory
+     * @return int number of products
+     */
+    @Override
+    public int getNumOfProducts() { return productList.size(); }
+
+    /**
      * Method to retrieve all product info in Inventory
      * @return List of all products and their data in a 2D list
      */
-    public List<List<Object>> getInventoryInfo() {
+    @Override
+    public List<List<Object>> getProductStockInfo() {
 
         List<List<Object>> inventoryList = new ArrayList<>();
 

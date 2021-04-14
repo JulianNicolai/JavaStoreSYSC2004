@@ -72,7 +72,7 @@ public class StoreView {
         this.store = store;
         this.cartID = UUID.randomUUID();
         store.addUser(this);
-        this.cart = new ShoppingCart();
+        this.cart = new ShoppingCart(store);
 
         this.cartProductPanel = new JPanel();
         cartProductPanel.setLayout(new BoxLayout(cartProductPanel, BoxLayout.Y_AXIS));
@@ -129,12 +129,6 @@ public class StoreView {
      * @return Integer cartID of user
      */
     public UUID getCartID() { return cartID; }
-
-    /**
-     * Method used for testing to retrieve user cart
-     * @return ShoppingCart of user
-     */
-    public ShoppingCart getCart() { return cart; }
 
     /**
      * Retrieves username of StoreView
@@ -405,7 +399,7 @@ public class StoreView {
      * Proxy method to retrieve transaction data from the ShoppingCart
      * @return returns 2D list of all products and number of units
      */
-    public List<List<Object>> getCartInfo() { return cart.getCartInfo(); }
+    public List<List<Object>> getCartInfo() { return cart.getProductStockInfo(); }
 
     /**
      * Method to start the interface of a user
@@ -508,7 +502,7 @@ public class StoreView {
 
         // retrieving relevant data from the inventory (for products panel) and users cart (for cart panel)
         List<List<Object>> inventoryArray = store.getInventoryInfo();
-        List<List<Object>> cartArray = cart.getCartInfo();
+        List<List<Object>> cartArray = cart.getProductStockInfo();
 
         // updating products panel with current inventory
         for (List<Object> item : inventoryArray) {
@@ -622,7 +616,7 @@ public class StoreView {
 
             // try to find the object in the cart, if it does not exist set exist flag to false
             try {
-                cart.getUnits(product.getID());
+                cart.getProductQuantity(product);
             } catch (IllegalArgumentException err) {
                 exist = false;
             }
@@ -641,7 +635,7 @@ public class StoreView {
                 }
 
                 // set spinner max to the new stock available in inventory
-                int newStock = store.getStock(product.getID());
+                int newStock = store.getStock(product);
                 unitSpinner.setModel(new SpinnerNumberModel(0, 0, newStock, 1));
             }
         });
@@ -708,7 +702,7 @@ public class StoreView {
         removeFromCart.setMargin(new Insets(1, 1, 1, 1));
 
         // create spinner for units in cart
-        int stock = store.getStock(product.getID());
+        int stock = store.getStock(product);
         SpinnerModel unitModel = new SpinnerNumberModel(units, 0, units + stock, 1);
         JSpinner unitSpinner = new JSpinner(unitModel);
         unitSpinner.setFont(ClientSettings.FontList.FONT_12);
@@ -724,7 +718,7 @@ public class StoreView {
         // allows spinner to add/remove stock and units as appropriate dynamically
         unitSpinner.addChangeListener(e -> {
 
-            int currentUnits = cart.getUnits(product.getID());
+            int currentUnits = cart.getProductQuantity(product);
             int currentSpinnerValue = (int) unitSpinner.getValue();
 
             // check if current units in store is less than the current spinner value; if so, it was increased
@@ -732,7 +726,7 @@ public class StoreView {
 
             if (currentSpinnerValue == 0) {
                 // if spinner is put down to 0, remove the product from cart
-                removeFromCart(product, cart.getUnits(product.getID()));
+                removeFromCart(product, cart.getProductQuantity(product));
                 List<JPanel> panels = productDirectory.get(product.getID());
                 cartProductPanel.remove(panels.get(1));
                 cartProductPanel.repaint();
@@ -753,7 +747,7 @@ public class StoreView {
 
         // if remove button is pressed, remove the item from cart
         removeFromCart.addActionListener(e -> {
-            removeFromCart(product, cart.getUnits(product.getID()));
+            removeFromCart(product, cart.getProductQuantity(product));
             List<JPanel> panels = productDirectory.get(product.getID());
             cartProductPanel.remove(panels.get(1));
             cartProductPanel.repaint();
@@ -799,7 +793,7 @@ public class StoreView {
         Component[] c41 = ((JPanel) c3[1]).getComponents();
         JLabel label = (JLabel) c40[1];
         JSpinner spinner = (JSpinner) c41[0];
-        int stock = store.getStock(product.getID());
+        int stock = store.getStock(product);
         // once label and spinner is found, as well as the current stock, update them
         label.setText(Integer.toString(stock));
         // eliminates triggering of changeListener and updates the max value
@@ -811,15 +805,14 @@ public class StoreView {
      * @param product Product that requires updating
      */
     private void updateCartUnitsLabel(Product product) {
-        UUID id = product.getID();
-        JPanel productPanel = productDirectory.get(id).get(1); // get cart entry panel of the product
+        JPanel productPanel = productDirectory.get(product.getID()).get(1); // get cart entry panel of the product
         // like updateProductStockLabel, go through all children to find desired spinner
         Component[] c1 = productPanel.getComponents();
         Component[] c2 = ((JPanel) c1[0]).getComponents();
         Component[] c3 = ((JPanel) c2[1]).getComponents();
         JSpinner spinner = (JSpinner) c3[1];
-        int stock = store.getStock(id);
-        int units = cart.getUnits(id);
+        int stock = store.getStock(product);
+        int units = cart.getProductQuantity(product);
         // update spinner model and value
         spinner.setModel(new SpinnerNumberModel(units, 0, units + stock, 1));
     }
@@ -852,7 +845,7 @@ public class StoreView {
             if (result == JOptionPane.OK_OPTION) {
 
                 // retrieve current cart listings
-                List<List<Object>> cartInfo = cart.getCartInfo();
+                List<List<Object>> cartInfo = cart.getProductStockInfo();
 
                 // HTML formatted table base strings
                 String htmlStart = "<html>" +
@@ -921,7 +914,7 @@ public class StoreView {
      */
     private double calculateCartTotal() {
 
-        List<List<Object>> cartList = cart.getCartInfo();
+        List<List<Object>> cartList = cart.getProductStockInfo();
 
         // go through all items in cart and sum the price * units bought
         double total = 0.0;
@@ -940,7 +933,7 @@ public class StoreView {
      */
     private void addToCart(Product product, int units) {
         try {
-            cart.addToCart(store, product, units);
+            cart.addProductQuantity(product, units);
             updateProductStockLabel(product);
             updateCartTotal();
         } catch (IllegalArgumentException err) {
@@ -955,7 +948,7 @@ public class StoreView {
      */
     private void removeFromCart(Product product, int units) {
         try {
-            cart.removeFromCart(store, product, units);
+            cart.removeProductQuantity(product, units);
             updateProductStockLabel(product);
             updateCartTotal();
         } catch (IllegalArgumentException err) {

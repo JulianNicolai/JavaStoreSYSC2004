@@ -8,7 +8,7 @@ import java.util.*;
  * Manages the shopping cart of a StoreView user
  * @author Julian Nicolai 101154233
  */
-public class ShoppingCart {
+public class ShoppingCart implements ProductStockContainer {
 
     /**
      * List of CartEntry's containing product and units to be purchased
@@ -16,9 +16,17 @@ public class ShoppingCart {
     private final List<CartEntry> cartList;
 
     /**
+     * StoreManager the shopping cart is using
+     */
+    private final StoreManager store;
+
+    /**
      * Constructor to initialize the cart list
      */
-    public ShoppingCart() { this.cartList = new ArrayList<>(); }
+    public ShoppingCart(StoreManager store) {
+        this.cartList = new ArrayList<>();
+        this.store = store;
+    }
 
     /**
      * CartEntry static nested class is used to associate a product with the number of units in a users cart
@@ -37,7 +45,7 @@ public class ShoppingCart {
 
         // accessors
         public Product getProduct() { return this.product; }
-        public int getUnits() { return this.units; }
+        public int getStock() { return this.units; }
 
         // mutators
         public void setUnits(int units) { this.units = units; }
@@ -45,12 +53,13 @@ public class ShoppingCart {
 
     /**
      * Method used to retrieve a CartEntry object via the Product's ID
-     * @param id ID of requested object
+     * @param product Product to retrieve
      * @return CartEntry object of ID, returns null product if doesn't exist
      */
-    private CartEntry getCartEntryByID(UUID id) {
+    private CartEntry getCartEntry(Product product) {
 
         CartEntry matchingCartEntry = new CartEntry(); // starting state is no matching CartEntry (null product)
+        UUID id = product.getID();
 
         if (cartList.size() == 0) return matchingCartEntry; // if empty, return null CartEntry for no match
 
@@ -68,68 +77,72 @@ public class ShoppingCart {
     }
 
     /**
-     * Proxy method used to clear the cart of the ShoppingCart
-     */
-    public void clear() { cartList.clear(); }
-
-    /**
      * Method used to add products to a users ShoppingCart
-     * @param store store in which the user and inventory is contained
      * @param product product to be added to cart
-     * @param numUnits number of units to be bought
+     * @param numStock number of units to be bought
      */
-    public void addToCart(StoreManager store, Product product, int numUnits) {
+    @Override
+    public void addProductQuantity(Product product, int numStock) {
 
-        CartEntry cartEntry = getCartEntryByID(product.getID());
+        CartEntry cartEntry = getCartEntry(product);
 
-        store.removeStock(product.getID(), numUnits);
-        if (cartEntry.getProduct().getName() == null) cartList.add(new CartEntry(product, numUnits));
-        else cartEntry.setUnits(cartEntry.getUnits() + numUnits);
+        store.removeStock(product, numStock);
+        if (cartEntry.getProduct().getName() == null) cartList.add(new CartEntry(product, numStock));
+        else cartEntry.setUnits(cartEntry.getStock() + numStock);
 
     }
 
     /**
      * Method used to remove products to a users ShoppingCart
-     * @param store store in which the user and inventory is contained
      * @param product product to be removed from cart
-     * @param numUnits number of units to be removed
+     * @param numStock number of units to be removed
      */
-    public void removeFromCart(StoreManager store, Product product, int numUnits) {
+    @Override
+    public void removeProductQuantity(Product product, int numStock) {
 
-        CartEntry cartEntry = getCartEntryByID(product.getID());
+        CartEntry cartEntry = getCartEntry(product);
 
         if (cartEntry.getProduct().getName() == null) {
             throw new IllegalArgumentException("Product specified does not exist in your cart.");
-        } else if (cartEntry.getUnits() < numUnits) {
+        } else if (cartEntry.getStock() < numStock) {
             throw new IllegalArgumentException("Cannot remove more items than exist in your cart.");
         } else {
-            store.addStock(product.getID(), numUnits);
-            if (cartEntry.getUnits() - numUnits == 0) cartList.remove(cartEntry);
-            else cartEntry.setUnits(cartEntry.getUnits() - numUnits);
+            store.addStock(product, numStock);
+            if (cartEntry.getStock() - numStock == 0) cartList.remove(cartEntry);
+            else cartEntry.setUnits(cartEntry.getStock() - numStock);
         }
 
     }
 
     /**
      * Method for retrieving the current units of a Product
-     * @param id ID of desired Product
+     * @param product Product to retrieve
      * @return number of units in cart
      */
-    public int getUnits(UUID id) {
+    @Override
+    public int getProductQuantity(Product product) {
 
-        CartEntry cartEntry = getCartEntryByID(id);
+        CartEntry cartEntry = getCartEntry(product);
 
         if (cartEntry.getProduct().getName() == null)
             throw new IllegalArgumentException("The product requested does not exist.");
 
-        return cartEntry.getUnits();
+        return cartEntry.getStock();
     }
+
+    /**
+     * Method to retrieve the number of products in cart
+     * @return int number of products
+     */
+    @Override
+    public int getNumOfProducts() { return cartList.size(); }
 
     /**
      * Method to get all cart information data
      * @return 2D list of cart data containing units, name, and price of each product
      */
-    public List<List<Object>> getCartInfo() {
+    @Override
+    public List<List<Object>> getProductStockInfo() {
 
         List<List<Object>> cartItemList = new ArrayList<>();
 
@@ -137,7 +150,7 @@ public class ShoppingCart {
 
             List<Object> infoArray = new ArrayList<>();
 
-            infoArray.add(cartEntry.getUnits());
+            infoArray.add(cartEntry.getStock());
             infoArray.add(cartEntry.getProduct());
 
             cartItemList.add(infoArray);
@@ -145,5 +158,10 @@ public class ShoppingCart {
 
         return cartItemList;
     }
+
+    /**
+     * Proxy method used to clear the cart of the ShoppingCart
+     */
+    public void clear() { cartList.clear(); }
 
 }

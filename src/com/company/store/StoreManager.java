@@ -60,51 +60,30 @@ public class StoreManager {
 
     /**
      * Proxy method to remove stock from the inventory
-     * @param id ID of the product requested
+     * @param product Product to remove stock
      * @param numUnits number of units to be removed
      */
-    public void removeStock(UUID id, int numUnits) { inventory.removeStock(id, numUnits); }
+    public void removeStock(Product product, int numUnits) { inventory.removeProductQuantity(product, numUnits); }
 
     /**
      * Proxy method to add stock to the inventory
-     * @param id ID of the product requested
+     * @param product Product to add stock
      * @param numUnits number of units to be added
      */
-    public void addStock(UUID id, int numUnits) { inventory.addStock(id, numUnits); }
-
-    /**
-     * Method to retrieve StoreView user
-     * @param id cartID of requested user
-     * @return StoreView user object if found, null if ID doesn't exist
-     */
-    public StoreView getUserByID(UUID id) {
-
-        if (users.size() == 0) return null;
-
-        StoreView matchingStoreView = null;
-
-        for (StoreView user : users) {
-            if (user.getCartID().equals(id)) {
-                matchingStoreView = user;
-                break;
-            }
-        }
-
-        return matchingStoreView;
-    }
+    public void addStock(Product product, int numUnits) { inventory.addProductQuantity(product, numUnits); }
 
     /**
      * Method to retrieve stock using a specific product ID
-     * @param id UUID of product
+     * @param product product to retrieve
      * @return integer of stock available
      */
-    public int getStock(UUID id) { return inventory.getStock(id); }
+    public int getStock(Product product) { return inventory.getProductQuantity(product); }
 
     /**
      * Proxy method to retrieve information about the products contained in Inventory
      * @return 2D list of objects containing the product and its stock
      */
-    public List<List<Object>> getInventoryInfo() { return inventory.getInventoryInfo(); }
+    public List<List<Object>> getInventoryInfo() { return inventory.getProductStockInfo(); }
 
     /**
      * Method to add a new user to the StoreManager
