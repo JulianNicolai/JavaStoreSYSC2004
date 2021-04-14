@@ -68,18 +68,20 @@ public class StoreManager implements ProductStockContainer {
 
     /**
      * Method to add a new user to the StoreManager
-     * @param storeView StoreView user
+     * @param username username of user
+     * @param password password of user
      */
-    public void addUser(StoreView storeView) {
+    public StoreView addUser(String username, String password) {
 
-        boolean foundFlag = false;
         for (StoreView user : users) {
-            if (user.getCartID().equals(storeView.getCartID())) {
-                foundFlag = true;
-                break;
-            }
+            if (user.getUsername().equals(username))
+                throw new IllegalArgumentException("User already exists; choose a different username.");
         }
-        if (!foundFlag) users.add(storeView);
+
+        StoreView newUser = new StoreView(this, username, password);
+        users.add(newUser);
+
+        return newUser;
     }
 
     /**

@@ -71,7 +71,6 @@ public class StoreView {
     public StoreView(StoreManager store, String username, String password) {
         this.store = store;
         this.cartID = UUID.randomUUID();
-        store.addUser(this);
         this.cart = new ShoppingCart(store);
 
         this.cartProductPanel = new JPanel();
@@ -134,7 +133,7 @@ public class StoreView {
      * Retrieves username of StoreView
      * @return String username
      */
-    private String getUsername() { return username; }
+    public String getUsername() { return username; }
 
     /**
      * Main entry point to initialize and run program
@@ -144,19 +143,11 @@ public class StoreView {
 
         StoreManager storeManager = new StoreManager();
 
-        List<StoreView> users = new ArrayList<>();
-
         try {
 
-            // create three different users, with password: pass
-
-            StoreView user1 = new StoreView(storeManager, "Samuel", "pass");
-            StoreView user2 = new StoreView(storeManager, "Julian", "pass");
-            StoreView user3 = new StoreView(storeManager, "RandomUser", "pass");
-
-            users.add(user1);
-            users.add(user2);
-            users.add(user3);
+            storeManager.addUser("Samuel", "pass");
+            storeManager.addUser("Julian", "pass");
+            storeManager.addUser("RandomUser", "pass");
 
         } catch (IllegalArgumentException e) {
             dialog("system-error", e.getMessage(), "Illegal Parameter - User Creation");
@@ -164,9 +155,7 @@ public class StoreView {
 
         frameInit();
 
-//        users.get(0).displayGUI(); // display the first user immediately
-
-        displayLogin(users);
+        displayLogin(storeManager.getUsers());
 
     }
 
@@ -438,6 +427,7 @@ public class StoreView {
             String logoutMessage = "Are you sure you want to logout?";
             int result = JOptionPane.showConfirmDialog(frame, logoutMessage, "Confirm Logout", JOptionPane.YES_NO_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
+
                 displayLogin(store.getUsers());
             }
         });
