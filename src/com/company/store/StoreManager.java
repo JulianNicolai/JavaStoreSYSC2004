@@ -8,7 +8,7 @@ import java.util.*;
  * Interface to manage active users and the store Inventory
  * @author Julian Nicolai 101154233
  */
-public class StoreManager implements ProductStockContainer {
+public class StoreManager {
 
     /**
      * Inventory object that stores all products and their stock
@@ -33,7 +33,6 @@ public class StoreManager implements ProductStockContainer {
      * @param product Product to add stock
      * @param numUnits number of units to be added
      */
-    @Override
     public void addProductQuantity(Product product, int numUnits) { inventory.addProductQuantity(product, numUnits); }
 
     /**
@@ -41,7 +40,6 @@ public class StoreManager implements ProductStockContainer {
      * @param product Product to remove stock
      * @param numUnits number of units to be removed
      */
-    @Override
     public void removeProductQuantity(Product product, int numUnits) { inventory.removeProductQuantity(product, numUnits); }
 
     /**
@@ -49,21 +47,18 @@ public class StoreManager implements ProductStockContainer {
      * @param product product to retrieve
      * @return integer of stock available
      */
-    @Override
     public int getProductQuantity(Product product) { return inventory.getProductQuantity(product); }
 
     /**
      * Method to retrieve the number of products in cart
      * @return int number of products
      */
-    @Override
     public int getNumOfProducts() { return inventory.getNumOfProducts(); }
 
     /**
      * Proxy method to retrieve information about the products contained in Inventory
      * @return 2D list of objects containing the product and its stock
      */
-    @Override
     public List<ProductEntry> getProductStockInfo() { return inventory.getProductStockInfo(); }
 
     /**
